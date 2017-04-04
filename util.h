@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 #include <thread>
-#include <tuple>
 /*These two are included with MSVC Runtime.
 Soon I'll move to MinGW, and I'll be able to port the
 project to Linux (sys/socket.h instead of winsock2.h)

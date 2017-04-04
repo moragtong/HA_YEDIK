@@ -1,6 +1,5 @@
-﻿  stdafx.cpp
-  p2p_tracker.cpp
-c:\users\miket\documents\github\p2p_michael_ori\util.h(45): warning C4996: 'socket::inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+﻿  p2p_tracker.cpp
+c:\users\miket\documents\github\p2p_michael_ori\util.h(44): warning C4996: 'socket::inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
   c:\program files (x86)\windows kits\10\include\10.0.14393.0\um\winsock2.h(1828): note: see declaration of 'socket::inet_addr'
 c:\users\miket\documents\github\p2p_michael_ori\p2p_tracker\p2p_tracker.cpp(27): warning C4101: 'status': unreferenced local variable
 c:\program files (x86)\microsoft visual studio\preview\professional\vc\tools\msvc\14.10.25017\include\xutility(2518): warning C4996: 'std::copy_backward::_Unchecked_iterators::_Deprecate': Call to 'std::copy_backward' with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
@@ -19,6 +18,5 @@ c:\program files (x86)\microsoft visual studio\preview\professional\vc\tools\msv
               _OutIt=etl::pvoidvector::iterator,
               _InIt=etl::pvoidvector::iterator
           ]
-  Generating Code...
   p2p_tracker.vcxproj -> C:\Users\miket\Documents\GitHub\p2p_michael_ori\p2p_tracker\Debug\p2p_tracker.exe
   p2p_tracker.vcxproj -> C:\Users\miket\Documents\GitHub\p2p_michael_ori\p2p_tracker\Debug\p2p_tracker.pdb (Partial PDB)
