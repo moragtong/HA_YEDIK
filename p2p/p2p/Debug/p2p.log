@@ -1,0 +1,9 @@
+﻿  p2p.cpp
+c:\users\miket\documents\mylib\util.h(45): warning C4996: 'socket::inet_addr': Use inet_pton() or InetPton() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\um\winsock2.h(1828): note: see declaration of 'socket::inet_addr'
+c:\users\miket\documents\visual studio 2017\projects\p2p\p2p\p2p_client.h(22): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+c:\users\miket\documents\visual studio 2017\projects\p2p\p2p\p2p_client.h(71): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.14393.0\ucrt\stdio.h(207): note: see declaration of 'fopen'
+  p2p.vcxproj -> C:\Users\miket\documents\visual studio 2017\Projects\p2p\Debug\p2p_client.exe
+  p2p.vcxproj -> C:\Users\miket\documents\visual studio 2017\Projects\p2p\Debug\p2p_client.pdb (Partial PDB)
