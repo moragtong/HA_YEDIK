@@ -17,8 +17,8 @@ int main() {
 			std::cout << command << ' ' << client.f.name << '\n';
 			client.command_tracker(p2p_client::ADD);
 		} else
-			std::puts("invalid input");
+			puts("invalid input");
 	//}
-	std::puts("done");
+	puts("done");
 	return 0;
 }

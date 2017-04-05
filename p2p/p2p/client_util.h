@@ -30,7 +30,7 @@ namespace p2p_client {
 			return _end - _buff;
 		}
 	};
-	enum trk_com_enum { ADD, LIST, REMOVE };
+	enum trk_com_enum { ADD, REMOVE, LIST };
 	struct trk_com {
 		trk_com_enum command;
 		//unsigned long param = 0;

@@ -4,7 +4,7 @@
 #include <vector.h>
 #include <algorithm>
 namespace p2p_tracker {
-	enum trk_com_enum { ADD, LIST, REMOVE };
+	enum trk_com_enum { ADD, REMOVE, LIST };
 	struct trk_com {
 		trk_com_enum command;
 		//unsigned long param = 0;
@@ -21,20 +21,17 @@ namespace p2p_tracker {
 		for (;;) {
 			util::sockaddr client;
 			int fromlen = sizeof(client);
-			sizeof(util::sockaddr);
 			socket::recvfrom(sock, (char*)&com, sizeof(com), 0, &client, &fromlen);
 			std::cout << socket::WSAGetLastError();
-			trk_com_enum status;
-			if (com.command == ADD)
-				clients.push_back(client);
-			else if (com.command == REMOVE)
-				clients.erase(std::remove(clients.begin(), clients.end(), client), clients.end());
-			socket::sendto(sock, (char*)&com.command, sizeof(com.command), 0, &client, sizeof(client));
-			if (com.command == LIST) {
-				auto size = clients.size();
-				socket::sendto(sock, (char*)&size, sizeof(size), 0, &client, sizeof(client));
-				socket::sendto(sock, (char*)clients.data(), size * sizeof(util::sockaddr), 0, &client, sizeof(client));
-			}
+			if (com.command <= REMOVE) {
+				if (com.command == ADD) {
+					clients.push_back(client);
+					clients.back().port(clients.back().port() + 1);
+				} else //if (com.command == REMOVE)
+					clients.erase(std::remove(clients.begin(), clients.end(), client), clients.end());
+				socket::sendto(sock, (char*)&com.command, sizeof(com.command), 0, &client, sizeof(client));
+			} else //if (com.command == LIST)
+				socket::sendto(sock, (char*)clients.data(), clients.size() * sizeof(util::sockaddr), 0, &client, sizeof(client));
 			puts(enum_repr[com.command]);
 		}
 	}
