@@ -11,11 +11,11 @@ namespace p2p_tracker {
 	};
 	void init() {
 		socket::init_winsock();
-		const char * enum_repr[]{ "ADD", "LIST", "REMOVE" };
+		const char * enum_repr[]{ "ADD", "REMOVE", "LIST" };
 		trk_com com;
 		etl::vector<util::sockaddr, 128> clients;
 		socket::SOCKET sock;
-		util::sockaddr addr("127.0.0.1", 16673);
+		util::sockaddr addr({ 127, 0, 0, 1 }, 16673);
 		sock = util::udp_sock();
 		std::cout << bind(sock, &addr, sizeof(addr));
 		for (;;) {

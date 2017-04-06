@@ -85,13 +85,13 @@ namespace p2p_client {
 					fclose(fhandle);
 			}
 			p2p_client() :
-				tracker("127.0.0.1", 16673) {
+				tracker({ 127, 0, 0, 1 }, 16673) {
 				socket::init_winsock();
 				std::memset(f.name, 0, sizeof(f.name));
 				recv_sock = util::udp_sock();
 				seed_sock = util::udp_sock();
 				{
-					util::sockaddr sname("127.0.0.1", 0);
+					util::sockaddr sname({ 127, 0, 0, 1 }, 0);
 					std::cout << socket::bind(recv_sock, &sname, sizeof(sname));
 					int p = sizeof(sname);
 					socket::getsockname(recv_sock, &sname, &p);
