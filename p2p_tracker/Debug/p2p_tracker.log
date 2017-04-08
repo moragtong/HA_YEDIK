@@ -1,4 +1,19 @@
-﻿clang-cl.exe : warning : argument unused during compilation: '/ZI' [-Wunused-command-line-argument]
-clang-cl.exe : warning : argument unused during compilation: '/Gm' [-Wunused-command-line-argument]
+﻿  p2p_tracker.cpp
+c:\program files (x86)\microsoft visual studio\preview\professional\vc\tools\msvc\14.10.25017\include\xutility(2518): warning C4996: 'std::copy_backward::_Unchecked_iterators::_Deprecate': Call to 'std::copy_backward' with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
+  c:\program files (x86)\microsoft visual studio\preview\professional\vc\tools\msvc\14.10.25017\include\xutility(2518): note: see declaration of 'std::copy_backward::_Unchecked_iterators::_Deprecate'
+  c:\users\miket\documents\github\p2p_michael_ori\etl-master\src\private\pvoidvector.h(420): note: see reference to function template instantiation '_BidIt2 std::copy_backward<etl::pvoidvector::iterator,etl::pvoidvector::iterator>(_BidIt1,_BidIt1,_BidIt2)' being compiled
+          with
+          [
+              _BidIt2=etl::pvoidvector::iterator,
+              _BidIt1=etl::pvoidvector::iterator
+          ]
+c:\program files (x86)\microsoft visual studio\preview\professional\vc\tools\msvc\14.10.25017\include\xutility(2350): warning C4996: 'std::copy::_Unchecked_iterators::_Deprecate': Call to 'std::copy' with parameters that may be unsafe - this call relies on the caller to check that the passed values are correct. To disable this warning, use -D_SCL_SECURE_NO_WARNINGS. See documentation on how to use Visual C++ 'Checked Iterators'
+  c:\program files (x86)\microsoft visual studio\preview\professional\vc\tools\msvc\14.10.25017\include\xutility(2350): note: see declaration of 'std::copy::_Unchecked_iterators::_Deprecate'
+  c:\users\miket\documents\github\p2p_michael_ori\etl-master\src\private\pvoidvector.h(475): note: see reference to function template instantiation '_OutIt std::copy<etl::pvoidvector::iterator,etl::pvoidvector::iterator>(_InIt,_InIt,_OutIt)' being compiled
+          with
+          [
+              _OutIt=etl::pvoidvector::iterator,
+              _InIt=etl::pvoidvector::iterator
+          ]
   p2p_tracker.vcxproj -> C:\Users\miket\Documents\GitHub\p2p_michael_ori\p2p_tracker\Debug\p2p_tracker.exe
   p2p_tracker.vcxproj -> C:\Users\miket\Documents\GitHub\p2p_michael_ori\p2p_tracker\Debug\p2p_tracker.pdb (Partial PDB)

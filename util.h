@@ -12,16 +12,21 @@ and maybe maybe maybe to Mac*/
 
 //#include <bitset>
 namespace socket {
-#ifdef WIN32
-#include <WinSock2.h>
+#ifdef _WIN32
+		#include <WinSock2.h>
 	WSADATA init_winsock() {
 		WSADATA wsaData;
-		socket::WSAStartup(MAKEWORD(2, 2), &wsaData);
+		WSAStartup(MAKEWORD(2, 2), &wsaData);
 		return wsaData;
 	}
-#else
-#include <sys/socket.h>
-#endif
+	#else
+		#include <sys/socket.h>
+		#include <netinet/in.h>
+		#include <arpa/inet.h>
+		#include <sys/types.h>
+		#include <time.h>
+		#include <sys/ioctl.h>
+	#endif
 }
 namespace util {
 	class ip4addr {
@@ -68,9 +73,6 @@ namespace util {
 			return family() == other.family() && addr() == other.addr() && _port() == other._port();
 		}
 	};
-	auto udp_sock() {
-		return socket::socket(AF_INET, SOCK_DGRAM, socket::IPPROTO_UDP);
-	}
 	/*void recvfrom_s(socket::SOCKET s, char* buff, int size, int flags = 0, socket::sockaddr* from = 0, int len = 0) {
 		int check;
 		do
