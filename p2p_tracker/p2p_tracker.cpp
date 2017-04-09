@@ -4,7 +4,7 @@
 #include <vector.h>
 #include <algorithm>
 namespace p2p_tracker {
-	enum trk_com_enum { ADD, REMOVE, LIST };
+	enum trk_com_enum : char { ADD, REMOVE, LIST };
 	struct trk_com {
 		trk_com_enum command;
 		//unsigned long param = 0;

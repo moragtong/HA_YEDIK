@@ -5,6 +5,9 @@ namespace p2p_client {
 	struct filedata {
 		char name[64];
 		unsigned long size;
+		filedata() {
+			std::memset(name, 0, sizeof(name));
+		}
 		friend std::istream& operator>>(std::istream& in, filedata& self) {
 			in >> self.name;
 			struct stat stat_buf;
@@ -13,12 +16,12 @@ namespace p2p_client {
 			return in;
 		}
 	};
-	enum trk_com_enum { ADD, REMOVE, LIST };
+	enum trk_com_enum : char { ADD, REMOVE, LIST };
 	struct trk_com {
 		trk_com_enum command;
-		//unsigned long param = 0;
+		//unsigned long param;
 	};
-	enum cln_com_enum { FILEDATA, PKT };
+	enum cln_com_enum : char { FILEDATA, PKT };
 	struct cln_com {
 		cln_com_enum command;
 		unsigned long param = 0;

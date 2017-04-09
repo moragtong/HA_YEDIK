@@ -15,8 +15,31 @@ namespace p2p_client {
 				trk_com msg{ com };
 				socket::sendto(recv_sock, (char*)&msg, sizeof(msg), 0, &tracker, sizeof(tracker));
 			}
+			int settimeout(long sec, long usec) {
+				const timeval& tv{ sec, usec };
+				auto v = setsockopt(recv_sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(tv));
+				std::cout << "setsockopt(" << tv.tv_sec << ", " << tv.tv_usec << ") -> " << v << '\n';
+				return v;
+			}
 		public:
 			filedata f;
+			p2p_client() :
+				tracker("127.0.0.1", 16673) {
+				socket::init_winsock();
+				recv_sock = util::udp_sock();
+				seed_sock = util::udp_sock();
+				{
+					util::sockaddr sname("127.0.0.1", 0);
+					std::cout << socket::bind(recv_sock, &sname, sizeof(sname));
+					int p = sizeof(sname);
+					socket::getsockname(recv_sock, &sname, &p);
+					std::cout << "recv sock port: " << sname.port() << '\n';
+					sname.port(sname.port() + 1);
+					std::cout << "seed sock port: " << sname.port() << '\n';
+					std::cout << socket::bind(seed_sock, &sname, sizeof(sname)) << '\n';
+				}
+				seed_thread = std::thread(&p2p_client::seed, this);
+			}
 			void seed() {
 				const char * enum_rep[]{ "FILEDATA", "PKT" };
 				puts("seed running");
@@ -60,6 +83,7 @@ namespace p2p_client {
 			void request_filedata() {
 				std::cout << "request_filedata:" << clients.size() << '\n';
 				cln_com filedata_msg{ FILEDATA };
+				settimeout(0, 200);
 				for (unsigned char i = 0;; i = (i + 1) % clients.size()) {
 					socket::sendto(recv_sock, (char*)&filedata_msg, sizeof(filedata_msg), 0, clients.data() + i, sizeof(clients[i]));
 					auto check = socket::recvfrom(recv_sock, (char*)&f, sizeof(f), 0, 0, 0);
@@ -68,6 +92,7 @@ namespace p2p_client {
 					if (check != -1)
 						break;
 				}
+				settimeout(0, 0);
 				puts(f.name);
 			}
 			void recv_file() {
@@ -76,6 +101,7 @@ namespace p2p_client {
 				auto psize = f.size / buffsize + (f.size % buffsize ? 1 : 0);
 				cln_com pkt_msg{ PKT };
 				char buff[buffsize];
+				settimeout(0, 200);
 				for (size_t i = 0; pkt_msg.param < psize; i = (i + 1) % clients.size()) {
 					socket::sendto(recv_sock, (char*)&pkt_msg, sizeof(pkt_msg), 0, clients.data() + i, sizeof(clients[i]));
 					auto check = socket::recvfrom(recv_sock, buff, sizeof(buff), 0, 0, 0);
@@ -85,26 +111,9 @@ namespace p2p_client {
 						fwrite(buff, sizeof(char), sizeof(buff) / sizeof(char), fhandle);
 					}
 				}
+				settimeout(0, 0);
 				if (fhandle)
 					fclose(fhandle);
-			}
-			p2p_client() :
-				tracker("127.0.0.1", 16673) {
-				socket::init_winsock();
-				std::memset(f.name, 0, sizeof(f.name));
-				recv_sock = util::udp_sock();
-				seed_sock = util::udp_sock();
-				{
-					util::sockaddr sname("127.0.0.1", 0);
-					std::cout << socket::bind(recv_sock, &sname, sizeof(sname));
-					int p = sizeof(sname);
-					socket::getsockname(recv_sock, &sname, &p);
-					std::cout << "recv sock port: " << sname.port() << '\n';
-					sname.port(sname.port() + 1);
-					std::cout << "seed sock port: " << sname.port() << '\n';
-					std::cout << socket::bind(seed_sock, &sname, sizeof(sname)) << '\n';
-				}
-				seed_thread = std::thread(&p2p_client::seed, this);
 			}
 			~p2p_client() {
 				socket::closesocket(recv_sock);
