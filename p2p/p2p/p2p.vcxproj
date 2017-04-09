@@ -91,13 +91,11 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\..\p2p_michael_ori\etl-master\src;..\..\..\p2p_michael_ori;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\p2p_michael_ori\etl\src;..\..\..\p2p_michael_ori;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <StackReserveSize>8MB</StackReserveSize>
-      <StackCommitSize>16KB</StackCommitSize>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -152,7 +150,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="client_util.h" />
-    <ClInclude Include="md5.h" />
     <ClInclude Include="p2p_client.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>

@@ -3,8 +3,6 @@
 #include <util.h>
 #include <vector.h>
 #include <algorithm>
-using namespace socket;
-using namespace util;
 namespace p2p_tracker {
 	enum trk_com_enum { ADD, REMOVE, LIST };
 	struct trk_com {
@@ -12,18 +10,18 @@ namespace p2p_tracker {
 		//unsigned long param = 0;
 	};
 	void init() {
-		init_winsock();
-		const char * enum_repr[]{ "ADD", "REMOVE", "LIST" };
+		socket::init_winsock();
+		const char * enum_repr[]{ "ADD", "LIST", "REMOVE" };
 		trk_com com;
-		etl::vector<util::sockaddr, 64> clients;
-		SOCKET sock;
-		util::sockaddr addr({ 127, 0, 0, 1 }, 16673);
-		sock = socket::socket(AF_INET, SOCK_DGRAM, 0);
+		etl::vector<util::sockaddr, 128> clients;
+		socket::SOCKET sock;
+		util::sockaddr addr("127.0.0.1", 16673);
+		sock = util::udp_sock();
 		std::cout << bind(sock, &addr, sizeof(addr));
 		for (;;) {
 			util::sockaddr client;
 			int fromlen = sizeof(client);
-			recvfrom(sock, (char*)&com, sizeof(com), 0, &client, &fromlen);
+			socket::recvfrom(sock, (char*)&com, sizeof(com), 0, &client, &fromlen);
 			std::cout << socket::WSAGetLastError();
 			if (com.command <= REMOVE) {
 				if (com.command == ADD) {
@@ -31,9 +29,9 @@ namespace p2p_tracker {
 					clients.back().port(clients.back().port() + 1);
 				} else //if (com.command == REMOVE)
 					clients.erase(std::remove(clients.begin(), clients.end(), client), clients.end());
-				sendto(sock, (char*)&com.command, sizeof(com.command), 0, &client, sizeof(client));
+				socket::sendto(sock, (char*)&com.command, sizeof(com.command), 0, &client, sizeof(client));
 			} else //if (com.command == LIST)
-				sendto(sock, (char*)clients.data(), clients.size() * sizeof(util::sockaddr), 0, &client, sizeof(client));
+				socket::sendto(sock, (char*)clients.data(), clients.size() * sizeof(util::sockaddr), 0, &client, sizeof(client));
 			puts(enum_repr[com.command]);
 		}
 	}
