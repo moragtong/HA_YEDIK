@@ -1,6 +1,3 @@
 [submodule "etl"]
 	path = etl
 	url = git://github.com/ETLCPP/etl.git
-[submodule "Visual-Studio-gtkmm"]
-	path = Visual-Studio-gtkmm
-	url = git://github.com/codekiddy2/Visual-Studio-gtkmm.git
