@@ -55,13 +55,4 @@ namespace util {
 			return family() == other.family() && addr() == other.addr() && port() == other.port();
 		}
 	};
-	auto udp_sock() {
-		return socket::socket(AF_INET, SOCK_DGRAM, socket::IPPROTO_UDP);
-	}
-	/*void recvfrom_s(socket::SOCKET s, char* buff, int size, int flags = 0, socket::sockaddr* from = 0, int len = 0) {
-		int check;
-		do
-			check = socket::recvfrom(s, buff, size, flags, from, len ? &len : 0);
-		while (check == -1);
-	}*/
 }
