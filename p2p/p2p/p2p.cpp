@@ -1,10 +1,10 @@
 //#include <iostream>
 //#include <gtkmm.h>
-#include <gtkmm/main.h>
+/*#include <gtkmm/main.h>
 #include <gtkmm/window.h>
-#include <gtkmm/button.h>
+#include <gtkmm/button.h>*/
 #include "p2p_client.h"
-class HelloWorld : public Gtk::Window {
+/*class HelloWorld : public Gtk::Window {
 
 public:
 	HelloWorld();
@@ -42,33 +42,34 @@ HelloWorld::~HelloWorld() {
 
 void HelloWorld::on_button_clicked() {
 	std::cout << "Hello World" << std::endl;
-}
+}*/
 int main(int argc, char** argv) {
-	/*p2p_client::p2p_client client;
+	init_winsock();
+	p2p_client::p2p_client client;
+	client.init();
 	char command[16];
 	//for (;;) {
 		std::memset(command, 0, sizeof(command));
 		std::cin >> command;
-		if (!strcmp(command, "remove"))
+		/*if (!strcmp(command, "remove"))
 			client.command_tracker(p2p_client::REMOVE);
-		else if (!strcmp(command, "recv")) {
-			client.request_list();
-			client.request_filedata();
-			client.recv_file();
-			client.command_tracker(p2p_client::ADD);
+		else*/ if (!strcmp(command, "recv")) {
+			unsigned short i;
+			std::cin >> i;
+			client.start(i);
 		} else if (!strcmp(command, "add")) {
 			std::cin >> client.f;
 			std::cout << command << ' ' << client.f.name << '\n';
-			client.command_tracker(p2p_client::ADD);
+			client.new_seed();
 		} else
 			puts("invalid input");
 	//}
-	puts("done");*/
-	Gtk::Main kit(argc, argv);
+	puts("done");
+	/*Gtk::Main kit(argc, argv);
 
 	HelloWorld helloworld;
 	//Shows the window and returns when it is closed.
-	Gtk::Main::run(helloworld);
+	Gtk::Main::run(helloworld);*/
 
 	return 0;
 }

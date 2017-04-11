@@ -24,10 +24,21 @@ namespace socket {
 #endif
 }
 namespace util {
+	class ip4addr {
+	private:
+		char _addr[4];
+	public:
+		ip4addr(char num1, char num2, char num3, char num4)
+			: _addr{ num1, num2, num3, num4 } {
+		}
+		operator long() {
+			return *((long*)_addr);
+		}
+	};
 	struct sockaddr : socket::sockaddr {
 		sockaddr() {
 		}
-		sockaddr(const char* _addr, unsigned short _port) {
+		sockaddr(ip4addr _addr, unsigned short _port) {
 			family(AF_INET).addr(_addr).port(_port);
 		}
 		auto family() const {
@@ -40,19 +51,38 @@ namespace util {
 		auto addr() const {
 			return ((socket::sockaddr_in*)this)->sin_addr.S_un.S_addr;
 		}
-		sockaddr& addr(const char* _addr) {
-			((socket::sockaddr_in*)this)->sin_addr.S_un.S_addr = socket::inet_addr(_addr);
+		sockaddr& addr(ip4addr _addr) {
+			((socket::sockaddr_in*)this)->sin_addr.S_un.S_addr = _addr;
 			return *this;
 		}
 		auto port() const {
 			return socket::ntohs(((socket::sockaddr_in*)this)->sin_port);
+		}
+		auto _port() const {
+			return ((socket::sockaddr_in*)this)->sin_port;
+		}
+		void _port(unsigned short val) {
+			((socket::sockaddr_in*)this)->sin_port = val;
 		}
 		sockaddr& port(unsigned short _port) {
 			((socket::sockaddr_in*)this)->sin_port = socket::htons(_port);
 			return *this;
 		}
 		bool operator==(sockaddr const& other) const {
-			return family() == other.family() && addr() == other.addr() && port() == other.port();
+			return family() == other.family() && addr() == other.addr() && _port() == other._port();
+		}
+	};
+	struct p2p_socket {
+		socket::SOCKET sock;
+		int settimeout(unsigned long sec, unsigned long usec) {
+			#ifdef _WIN32
+			const unsigned long tv = sec * 1000 + usec;
+			#else
+			const timeval tv{ sec, usec };
+			#endif
+			auto v = socket::setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(tv));
+			std::cout << "setsockopt(" << sec << ", " << usec << ") -> " << v << '\n';
+			return v;
 		}
 	};
 }

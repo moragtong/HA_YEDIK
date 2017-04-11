@@ -16,10 +16,10 @@ namespace p2p_client {
 			return in;
 		}
 	};
-	enum trk_com_enum : char { ADD, REMOVE, NEW, LIST };
+	enum trk_com_enum : char { ADD, REMOVE, LIST };
 	struct trk_com {
 		trk_com_enum command;
-		unsigned long param = 0;
+		//unsigned long param = 0;
 	};
 	enum cln_com_enum : char { FILEDATA, PKT };
 	struct cln_com {
