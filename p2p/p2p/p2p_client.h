@@ -50,39 +50,68 @@ namespace p2p_client {
 				}
 				
 			}
-			void _recv() {
+			bool _recv() {
 				auto fhandle = fopen(f.name, "wb");
 				std::cout << "recv-fhandle: " << fhandle;
-				auto psize = f.size / buffsize + (f.size % buffsize ? 1 : 0);
-				cln_com pkt_msg{ PKT };
-				char buff[buffsize];
-				for (BYTE i = 0; pkt_msg.param < psize; i = (i + 1) % clients.size()) {
-					sendto(sock, (char*)&pkt_msg, sizeof(pkt_msg), 0, clients.data() + i, sizeof(clients[i]));
-					auto check = recvfrom(sock, buff, sizeof(buff), 0, 0, 0);
-					std::cout << "recv_file: " << WSAGetLastError() << ' ' << check << '\n';
-					if (check != -1) {
-						pkt_msg.param++;
-						fwrite(buff, sizeof(char), sizeof(buff) / sizeof(char), fhandle);
+				if (fhandle) {
+					auto psize = f.size / buffsize + (f.size % buffsize ? 1 : 0);
+					cln_com pkt_msg{ PKT };
+					char buff[buffsize];
+					etl::array<char, CLN_NUM> relib;
+					relib.fill(3);
+					for (BYTE i = 0; pkt_msg.param < psize; ) {
+						if (clients.empty())
+							return false;
+						sendto(sock, (char*)&pkt_msg, sizeof(pkt_msg), 0, clients.data() + i, sizeof(clients[i]));
+						auto check = recvfrom(sock, buff, sizeof(buff), 0, 0, 0);
+						std::cout << "recv_file: " << WSAGetLastError() << ' ' << check << '\n';
+						if (check == -1) {
+							clients.erase(clients.data() + i);
+							if (clients.empty())
+								return false;
+							relib.erase_at(i);
+						} else {
+							if (relib[i])
+								relib[i]--;
+							else {
+								pkt_msg.param++;
+								fwrite(buff, sizeof(char), sizeof(buff) / sizeof(char), fhandle);
+							}
+							i = (i + 1) % clients.size();
+						}
 					}
-				}
-				if (fhandle)
 					fclose(fhandle);
+				} else
+					puts("_recv shit filename");
+				return true;
 			}
-			void request_filedata() {
+			bool request_filedata() {
 				std::cout << "request_filedata:" << clients.size() << '\n';
 				if (clients.size()) {
+					etl::array<char, CLN_NUM> relib;
+					relib.fill(3);
 					cln_com filedata_msg{ FILEDATA };
-					for (unsigned char i = 0;; i = (i + 1) % clients.size()) {
+					for (unsigned char i = 0;;) {
 						sendto(sock, (char*)&filedata_msg, sizeof(filedata_msg), 0, clients.data() + i, sizeof(clients[i]));
 						auto check = recvfrom(sock, (char*)&f, sizeof(f), 0, 0, 0);
 						std::cout << "request_filedata: " << WSAGetLastError() << ' ' << check << '\n'
 							<< f.name << ' ' << f.size << '\n';
 						if (check != -1)
 							break;
+						else if (relib[i]) {
+							relib[i]--;
+							i = (i + 1) % clients.size();
+						} else {
+							clients.erase(clients.data() + i);
+							if (clients.empty())
+								return false;
+							relib.erase_at(i);
+						}
 					}
 					puts(f.name);
 				} else
-					puts("shit");
+					puts("shit request_filedata");
+				return true;
 			}
 		public:
 			filedata f;
@@ -141,8 +170,10 @@ namespace p2p_client {
 			void start(unsigned short _port) {
 				tracker.port(_port);
 				request_list();
-				request_filedata();
-				_recv();
+				while(!request_filedata())
+					request_list();
+				while (!_recv())
+					request_list();
 				seed();
 			}
 	};
