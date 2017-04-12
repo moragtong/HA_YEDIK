@@ -6,6 +6,7 @@
 #include <algorithm>
 using namespace util;
 using namespace socket;
+enum { CLN_NUM = 32, TIMEOUT = 800 };
 enum trk_com_enum : char { ADD, REMOVE, LIST };
 struct trk_com {
 	trk_com_enum command;
@@ -29,7 +30,7 @@ struct p2p_tracker : protected p2p_socket {
 	}
 	void start(const util::sockaddr& starter) {
 		{
-			settimeout(0, 800);
+			settimeout(0, TIMEOUT);
 			int status;
 			do {
 				sendto(sock, 0, 0, 0, &starter, sizeof(starter));
@@ -41,11 +42,13 @@ struct p2p_tracker : protected p2p_socket {
 		std::vector<util::sockaddr> clients{ starter };
 		util::sockaddr client;
 		int fromlen = sizeof(client);
-		for (;;) {
+		for (unsigned short i = 0;; i = (i + 1) % clients.size()) {
+			if (clients.size() - i < CLN_NUM)
+				i = 0;
 			recvfrom(sock, (char*)&com, sizeof(com), 0, &client, &fromlen);
 			std::cout << socket::WSAGetLastError() << ' ';
 			if (com.command == LIST)
-				sendto(sock, (char*)clients.data(), clients.size() * sizeof(util::sockaddr), 0, &client, sizeof(client));
+				sendto(sock, (char*)(clients.data() + i), min(CLN_NUM, clients.size()) * sizeof(util::sockaddr), 0, &client, sizeof(client));
 			else {
 				unsigned short ret = 1;
 				switch (com.command) {
@@ -77,7 +80,7 @@ int main() {
 	std::vector<download> trackers;
 	auto sock = socket::socket(AF_INET, SOCK_DGRAM, 0);
 	util::sockaddr addr({ 127,0,0,1 }, 16673);
-	std::cout << "main: " << bind(sock, &addr, sizeof(addr));
+	std::cout << "main: " << bind(sock, &addr, sizeof(addr)) << '\n';
 	util::sockaddr client;
 	int fromlen = sizeof(client);
 	for (;;) {

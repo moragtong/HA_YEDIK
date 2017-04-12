@@ -1,13 +1,14 @@
 #pragma once
 #include "client_util.h"
 #include <vector.h>
+enum { CLN_NUM = 32, TIMEOUT = 800 };
 using namespace util;
 using namespace socket;
 namespace p2p_client {
 	class p2p_client : protected p2p_socket {
 		private:
 			bool seeding;
-			etl::vector<util::sockaddr, 32> clients;
+			etl::vector<util::sockaddr, CLN_NUM> clients;
 			util::sockaddr tracker;
 			void send_command_tracker(trk_com_enum com) {
 				trk_com msg{ com };
@@ -96,7 +97,7 @@ namespace p2p_client {
 				int p = sizeof(sname);
 				getsockname(sock, &sname, &p);
 				std::cout << "client sock port: " << sname.port() << '\n';
-				settimeout(1,500);
+				settimeout(0, TIMEOUT);
 			}
 			void seed() {
 				if (!seeding) {

@@ -1,7 +1,7 @@
 #pragma once
 #include <util.h>
 namespace p2p_client {
-	enum { buffsize = 2048 };
+	enum { buffsize = 508 };
 	struct filedata {
 		char name[64];
 		unsigned long size;
