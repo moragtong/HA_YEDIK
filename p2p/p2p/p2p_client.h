@@ -39,7 +39,7 @@ class p2p_client : protected p2p_socket {
 						socket::sendto(sock, buff, sizeof(buff), 0, &client, sizeof(client));
 						fclose(fhandle);
 					} else if (recvd_com.command == FILEDATA)
-						socket::sendto(sock, (char*)&f, sizeof(f), 0, &client, sizeof(client));
+						socket::sendto(sock, (char*)&f, sizeof(f.size) + strlen(f.name), 0, &client, sizeof(client));
 					if (recvd_com.command > 1)
 						std::cout << recvd_com.command;
 					else
@@ -112,11 +112,16 @@ class p2p_client : protected p2p_socket {
 				puts("shit request_filedata");
 			return true;
 		}
-	public:
+	protected:
 		filedata f;
+		Gtk::TreeIter row_ref;
+	public:
 		p2p_client()
 			: tracker({ 127,0,0,1 }, 16673),
 			seeding(false) {
+		}
+		const util::sockaddr& get_tracker() {
+			return tracker;
 		}
 		void init() {
 			sock = socket::socket(AF_INET, SOCK_DGRAM, 0);
@@ -127,11 +132,14 @@ class p2p_client : protected p2p_socket {
 			std::cout << "client sock port: " << sname.port() << '\n';
 			settimeout(0, TIMEOUT);
 		}
+		void first_seed() {
+			seeding = true;
+			_seed();
+		}
 		void seed() {
 			if (!seeding) {
 				command_tracker(ADD);
-				seeding = true;
-				_seed();
+				first_seed();
 			}
 		}
 		void stop_seeding() {
@@ -143,14 +151,21 @@ class p2p_client : protected p2p_socket {
 		void new_seed() {
 			int check;
 			int tsize = sizeof(tracker);
-			do {
+			for (unsigned int count = 4; ; count--) {
 				sendto(sock, 0, 0, 0, &tracker, sizeof(tracker));
 				check = recvfrom(sock, 0, 0, 0, &tracker, &tsize);
-			} while (check < 0);
-			sendto(sock, 0, 0, 0, &tracker, sizeof(tracker));
-			std::cout << "new_seed: " << WSAGetLastError() << ' ' << tracker.port() << '\n';
-			seeding = true;
-			_seed();
+				if (!count)
+					return;
+				if (check >= 0)
+					break;
+			}
+			if (check >= 0) {
+				sendto(sock, 0, 0, 0, &tracker, sizeof(tracker));
+				auto newport = tracker.port();
+				std::cout << "new_seed: " << WSAGetLastError() << ' ' << newport << '\n';
+				row_ref->set_value(2, guint((unsigned int)newport));
+				first_seed();
+			}
 		}
 		void request_list() {
 			if (tracker.port() != 16673) {
