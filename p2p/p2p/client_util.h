@@ -7,16 +7,7 @@ struct filedata {
 	/*filedata() {
 		memset(name, 0, sizeof(name));
 	}*/
-	void init(const Glib::ustring& _name) {
-		auto off = _name.find_last_of('\\') + 1;
-		_name.copy(name, _name.length() - off, off);
-		name[_name.length() - off] = 0;
-		for (auto c : name)
-			putchar(c);
-		struct stat stat_buf;
-		int rc = stat(_name.c_str(), &stat_buf);
-		size = rc == 0 ? stat_buf.st_size : 0;
-	}
+	
 	/*friend std::istream& operator>>(std::istream& in, filedata& self) {
 		in >> self.name;
 		struct stat stat_buf;

@@ -3,6 +3,7 @@
 #include <util.h>
 #include <thread>
 #include <vector>
+#include <forward_list>
 #include <algorithm>
 using namespace util;
 using namespace socket;
@@ -15,7 +16,7 @@ struct trk_com {
 const char * enum_repr[]{ "ADD", "REMOVE", "LIST" };
 struct p2p_tracker : protected p2p_socket {
 	p2p_tracker() {}
-	void startall(const util::sockaddr& starter) {
+	void startall(util::sockaddr starter) {
 		init();
 		start(starter);
 	}
@@ -46,7 +47,9 @@ struct p2p_tracker : protected p2p_socket {
 			if (clients.size() - i < CLN_NUM)
 				i = 0;
 			recvfrom(sock, (char*)&com, sizeof(com), 0, &client, &fromlen);
-			std::cout << socket::WSAGetLastError() << ' ';
+			auto wsc = socket::WSAGetLastError();
+
+			std::cout << wsc << ' ';
 			if (com.command == LIST)
 				sendto(sock, (char*)(clients.data() + i), min(CLN_NUM, clients.size()) * sizeof(util::sockaddr), 0, &client, sizeof(client));
 			else {
@@ -77,7 +80,7 @@ struct download {
 };
 int main() {
 	init_winsock();
-	std::vector<download> trackers;
+	std::forward_list<download> trackers;
 	auto sock = socket::socket(AF_INET, SOCK_DGRAM, 0);
 	util::sockaddr addr({ 127,0,0,1 }, 16673);
 	std::cout << "main: " << bind(sock, &addr, sizeof(addr)) << '\n';
@@ -85,8 +88,7 @@ int main() {
 	int fromlen = sizeof(client);
 	for (;;) {
 		recvfrom(sock, 0, 0, 0, &client, &fromlen);
-		trackers.emplace_back(client);
+		trackers.emplace_front(client);
 	}
 	return 0;
 }
-

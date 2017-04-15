@@ -25,31 +25,36 @@ class p2p_client : protected p2p_socket {
 			puts("seed running");
 			cln_com recvd_com;
 			util::sockaddr client;
+			const char *open_name = full_filename.empty() ? f.name : full_filename.c_str();
 			while (seeding) {
 				int fromlen = sizeof(client);
 				auto got = recvfrom(sock, (char*)&recvd_com, sizeof(recvd_com), 0, &client, &fromlen);
+				//puts(f.name);
 				if (got > 0) {
 					std::cout << socket::WSAGetLastError() << '\n';
 					if (recvd_com.command == PKT) {
 						char buff[buffsize];
-						auto fhandle = fopen(f.name, "rb");
-						std::cout << "seed-fhandle: " << recvd_com.param;
-						fseek(fhandle, recvd_com.param*buffsize, SEEK_SET);
-						fread(buff, sizeof(char), sizeof(buff) / sizeof(char), fhandle);
-						socket::sendto(sock, buff, sizeof(buff), 0, &client, sizeof(client));
-						fclose(fhandle);
+						auto fhandle = fopen(open_name, "rb");
+						if (fhandle) {
+							std::cout << "seed-fhandle: " << recvd_com.param;
+							fseek(fhandle, recvd_com.param*buffsize, SEEK_SET);
+							fread(buff, sizeof(char), sizeof(buff) / sizeof(char), fhandle);
+							socket::sendto(sock, buff, sizeof(buff), 0, &client, sizeof(client));
+							fclose(fhandle);
+						} else
+							puts("seed file shite");
 					} else if (recvd_com.command == FILEDATA)
-						socket::sendto(sock, (char*)&f, sizeof(f.size) + strlen(f.name), 0, &client, sizeof(client));
+						socket::sendto(sock, (char*)&f, sizeof(f.size) + strlen(f.name) + 1, 0, &client, sizeof(client));
 					if (recvd_com.command > 1)
-						std::cout << recvd_com.command;
+						std::cout << "seed command shite " << recvd_com.command;
 					else
 						std::cout << enum_rep[recvd_com.command];
 					std::cout << '\n';
 				}
 			}
-
+			puts("_seed stopped");
 		}
-		bool _recv() {
+		char _recv() {
 			auto fhandle = fopen(f.name, "wb");
 			std::cout << "recv-fhandle: " << fhandle;
 			if (fhandle) {
@@ -60,14 +65,14 @@ class p2p_client : protected p2p_socket {
 				relib.fill(3);
 				for (BYTE i = 0; pkt_msg.param < psize; ) {
 					if (clients.empty())
-						return false;
+						return 1;
 					sendto(sock, (char*)&pkt_msg, sizeof(pkt_msg), 0, clients.data() + i, sizeof(clients[i]));
 					auto check = recvfrom(sock, buff, sizeof(buff), 0, 0, 0);
 					if (check == -1) {
 						std::cout << "recv_file: " << WSAGetLastError() << ' ' << check << '\n';
 						clients.erase(clients.data() + i);
 						if (clients.empty())
-							return false;
+							return 2;
 						relib.erase_at(i);
 					} else {
 						if (relib[i])
@@ -75,14 +80,16 @@ class p2p_client : protected p2p_socket {
 						else {
 							pkt_msg.param++;
 							fwrite(buff, sizeof(char), sizeof(buff) / sizeof(char), fhandle);
+							row_ref->set_value(3, guint(pkt_msg.param * 100 / psize));
 						}
 						i = (i + 1) % clients.size();
 					}
 				}
 				fclose(fhandle);
-			} else
-				puts("_recv shit filename");
-			return true;
+				return 0;
+			}
+			puts("_recv shit filename");
+			return 0;
 		}
 		bool request_filedata() {
 			std::cout << "request_filedata:" << clients.size() << '\n';
@@ -107,6 +114,9 @@ class p2p_client : protected p2p_socket {
 						relib.erase_at(i);
 					}
 				}
+				row_ref->set_value(0, Glib::ustring(f.name));
+				row_ref->set_value(1, gulong(f.size));
+				row_ref->set_value(2, guint((unsigned int)tracker.port()));
 				puts(f.name);
 			} else
 				puts("shit request_filedata");
@@ -115,7 +125,21 @@ class p2p_client : protected p2p_socket {
 	protected:
 		filedata f;
 		Gtk::TreeIter row_ref;
+		Glib::ustring full_filename;
 	public:
+		void set_row(Gtk::TreeIter& tr) {
+			row_ref = tr;
+		}
+		void init_filename(const Glib::ustring& _name) {
+			auto off = _name.find_last_of('\\') + 1;
+			full_filename = _name;
+			puts(full_filename.c_str());
+			_name.copy(f.name, _name.length() - off, off);
+			f.name[_name.length() - off] = 0;
+			struct stat stat_buf;
+			int rc = stat(_name.c_str(), &stat_buf);
+			f.size = rc == 0 ? stat_buf.st_size : 0;
+		}
 		p2p_client()
 			: tracker({ 127,0,0,1 }, 16673),
 			seeding(false) {
@@ -149,6 +173,9 @@ class p2p_client : protected p2p_socket {
 			}
 		}
 		void new_seed() {
+			row_ref->set_value(0, Glib::ustring(f.name));
+			row_ref->set_value(1, gulong(f.size));
+			row_ref->set_value(3, guint(100));
 			int check;
 			int tsize = sizeof(tracker);
 			for (unsigned int count = 4; ; count--) {
@@ -159,23 +186,23 @@ class p2p_client : protected p2p_socket {
 				if (check >= 0)
 					break;
 			}
-			if (check >= 0) {
-				sendto(sock, 0, 0, 0, &tracker, sizeof(tracker));
-				auto newport = tracker.port();
-				std::cout << "new_seed: " << WSAGetLastError() << ' ' << newport << '\n';
-				row_ref->set_value(2, guint((unsigned int)newport));
-				first_seed();
-			}
+			sendto(sock, 0, 0, 0, &tracker, sizeof(tracker));
+			auto newport = tracker.port();
+			std::cout << "new_seed: " << WSAGetLastError() << ' ' << newport << '\n';
+			row_ref->set_value(2, guint((unsigned int)newport));
+			first_seed();
 		}
 		void request_list() {
 			if (tracker.port() != 16673) {
 				clients.resize(clients.capacity());
-				int size;
+				int size, count = 4;
 				do {
 					send_command_tracker(LIST);
 					size = recvfrom(sock, (char*)clients.data(), clients.capacity() * sizeof(clients[0]), 0, 0, 0);
-				} while (size < 0);
-				clients.resize(size / sizeof(clients[0]));
+					--count;
+				} while (size < 0 && count);
+				if (count)
+					clients.resize(size / sizeof(clients[0]));
 				std::cout << clients.size();
 				std::cout << "request_list: " << WSAGetLastError() << '\n';
 			} else
@@ -184,10 +211,19 @@ class p2p_client : protected p2p_socket {
 		void start(unsigned short _port) {
 			tracker.port(_port);
 			request_list();
-			while (!request_filedata())
+			puts("hey");
+			for (int count = 4; !request_filedata() && count; --count)
 				request_list();
-			while (!_recv())
+			char recv_stat = _recv();
+			for (int count = 4; recv_stat == 2 && count; --count)
 				request_list();
-			seed();
+			puts("hey2");
+			if (!recv_stat)
+				seed();
+		}
+		~p2p_client() {
+			//stop_seeding();
+			puts(seeding ? "seeding" : "not seeding");
+			puts("client destructed");
 		}
 };
