@@ -1,7 +1,7 @@
 #pragma once
 #include "client_util.h"
 #include <vector.h>
-enum { CLN_NUM = 32, TIMEOUT = 800 };
+enum { CLN_NUM = 32, TIMEOUT = 6000 };
 using namespace util;
 using namespace socket;
 class p2p_client : protected p2p_socket {
@@ -36,7 +36,7 @@ class p2p_client : protected p2p_socket {
 						char buff[buffsize];
 						auto fhandle = fopen(open_name, "rb");
 						if (fhandle) {
-							std::cout << "seed-fhandle: " << recvd_com.param;
+							//std::cout << "seed-fhandle: " << recvd_com.param;
 							fseek(fhandle, recvd_com.param*buffsize, SEEK_SET);
 							auto red = fread(buff, 1, sizeof(buff), fhandle);
 							socket::sendto(sock, buff, red, 0, &client, sizeof(client));
@@ -65,7 +65,7 @@ class p2p_client : protected p2p_socket {
 				relib.fill(3);
 				for (BYTE i = 0; pkt_msg.param < psize; ) {
 					if (clients.empty())
-						return 1;
+						return 2;
 					sendto(sock, (char*)&pkt_msg, sizeof(pkt_msg), 0, clients.data() + i, sizeof(clients[i]));
 					auto check = recvfrom(sock, buff, sizeof(buff), 0, 0, 0);
 					if (check == -1) {
@@ -90,7 +90,7 @@ class p2p_client : protected p2p_socket {
 				return 0;
 			}
 			puts("_recv shit filename");
-			return 0;
+			return 1;
 		}
 		bool request_filedata() {
 			std::cout << "request_filedata:" << clients.size() << '\n';
@@ -216,8 +216,10 @@ class p2p_client : protected p2p_socket {
 			for (int count = 4; !request_filedata() && count; --count)
 				request_list();
 			char recv_stat = _recv();
-			for (int count = 4; recv_stat == 2 && count; --count)
+			for (int count = 4; recv_stat == 2 && count; --count) {
 				request_list();
+				recv_stat = _recv();
+			}
 			puts("hey2");
 			if (!recv_stat)
 				seed();

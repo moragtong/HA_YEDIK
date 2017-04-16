@@ -7,7 +7,7 @@
 #include <algorithm>
 using namespace util;
 using namespace socket;
-enum { CLN_NUM = 32, TIMEOUT = 800 };
+enum { CLN_NUM = 32, TIMEOUT = 1500 };
 enum trk_com_enum : char { ADD, REMOVE, LIST };
 struct trk_com {
 	trk_com_enum command;
@@ -22,7 +22,7 @@ struct p2p_tracker : protected p2p_socket {
 	}
 	unsigned short init() {
 		sock = socket::socket(AF_INET, SOCK_DGRAM, 0);
-		util::sockaddr addr({ 127,0,0,1 }, 0);
+		util::sockaddr addr({ 0,0,0,0 }, 0);
 		std::cout << bind(sock, &addr, sizeof(addr));
 		int p = sizeof(addr);
 		getsockname(sock, &addr, &p);
@@ -32,11 +32,13 @@ struct p2p_tracker : protected p2p_socket {
 	void start(const util::sockaddr& starter) {
 		{
 			settimeout(0, TIMEOUT);
+			char count = 4;
 			int status;
 			do {
 				sendto(sock, 0, 0, 0, &starter, sizeof(starter));
 				status = recvfrom(sock, 0, 0, 0, 0, 0);
-			} while (status < 0);
+				count--;
+			} while (status < 0 && count);
 			settimeout(0, 0);
 		}
 		trk_com com;
