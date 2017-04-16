@@ -1,6 +1,6 @@
 #pragma once
 #include <util.h>
-enum { buffsize = 508 };
+enum { buffsize = 1492 };
 struct filedata {
 	unsigned long size;
 	char name[FILENAME_MAX];

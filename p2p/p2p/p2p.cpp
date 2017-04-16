@@ -1,4 +1,5 @@
 #include <iostream>
+#include <forward_list>
 #include <thread>
 #undef max
 #undef min
@@ -10,33 +11,27 @@
 #include <gtkmm\liststore.h>
 #include <gtkmm\filechooserdialog.h>
 #include <gtkmm\spinbutton.h>
-#include <forward_list>
+//#include <gtkmm\box.h>
 #include "p2p_client.h"
-class session {
+class session : private p2p_client {
 	private:
-		p2p_client cln;
 		void start_download(unsigned short _port) {
-			cln.init();
-			cln.start(_port);
+			init();
+			start(_port);
 		}
 		void start_new_seed() {
-			cln.init();
-			cln.new_seed();
+			init();
+			new_seed();
 		}
 	public:
 		/*filedata& get_filedata() {
 			return f;
 		}*/
+		using p2p_client::p2p_client;
+		using p2p_client::init_filename;
+		using p2p_client::set_row;
 		auto port() {
-			return cln.get_tracker().port();
-		}
-		session() {
-		}
-		auto init_filename(const Glib::ustring& str) {
-			cln.init_filename(str);
-		}
-		void set_row(Gtk::TreeIter& tr) {
-			cln.set_row(tr);
+			return get_tracker().port();
 		}
 		auto start_download_async(unsigned short _port) {
 			return std::thread(&session::start_download, *this, _port);
@@ -50,19 +45,21 @@ class session {
 };
 class p2p_main : public Gtk::Main {
 	private:
+		ip4addr tracker_addr;
 		std::forward_list<std::thread> sessions;
 		Gtk::Window *w;
 		Glib::RefPtr<Gtk::ListStore> down_list;
 		Gtk::ToolButton *new_file, *download;
 		Gtk::FileChooserDialog *fc;
-		Gtk::Button *fc_ok, *fc_close, *close_port, *ok_port;
-		Gtk::SpinButton *get_port;
-		Gtk::Dialog *port_dialog;
+		Gtk::Button *fc_ok, *fc_close, *close_port, *ok_port, *taddr_next;
+		Gtk::SpinButton *get_port, *ips[4];
+		Gtk::Dialog *port_dialog, *taddr_dialog;
+		//Gtk::Box *taddr_vbox;
 		void addseed() {
 			Glib::ustring filename;
 			filename = fc->get_filename();
 			if (!filename.empty()) {
-				session s;
+				session s(tracker_addr);
 				fc->hide();
 				//std::cout << sessions. << '\n';
 				s.init_filename(filename);
@@ -75,10 +72,21 @@ class p2p_main : public Gtk::Main {
 			if (port >= 2000) {
 				port_dialog->hide();
 				//std::cout << sessions.size() << '\n';
-				session s;
+				session s(tracker_addr);
 				s.set_row(down_list->append());
 				sessions.push_front(std::move(s.start_download_async(port)));
 			}
+		}
+		void startmain() {
+			taddr_dialog->hide();
+			auto i = ips;
+			auto addri = tracker_addr._addr;
+			char count = sizeof(ips) / sizeof(ips[0]);
+			do {
+				*addri++ = (char&&)(*i++)->get_value_as_int();
+				count--;
+			} while (count);
+			w->show();
 		}
 	public:
 		p2p_main(int argc, char** argv)
@@ -87,10 +95,9 @@ class p2p_main : public Gtk::Main {
 				init_winsock();
 				Glib::RefPtr<Gtk::Builder> builder;
 				{
-					char buff[13000];
-					memset(buff, 0, sizeof(buff));
+					Glib::ustring buff(22000, '\0');
 					auto f = fopen("p2p.glade", "rb");
-					fread(buff, 1, sizeof(buff), f);
+					fread((void*)buff.c_str(), 1, buff.bytes(), f);
 					builder = Gtk::Builder::create_from_string(buff);
 					fclose(f);
 				}
@@ -104,19 +111,33 @@ class p2p_main : public Gtk::Main {
 				builder->get_widget("ok_port", ok_port);
 				builder->get_widget("port_dialog", port_dialog);
 				builder->get_widget("port_spin", get_port);
+				builder->get_widget("continue", taddr_next);
+				//builder->get_widget("taddr_vbox", taddr_vbox);
+				builder->get_widget("taddr_dialog", taddr_dialog); 
+				{
+					char ip_names[] = "ip1";
+					auto i = ips;
+					char counter = sizeof(ips) / sizeof(ips[0]);
+					do {
+						builder->get_widget(ip_names, *i++);
+						ip_names[2]++;
+						counter--;
+					} while (counter);
+				}
 				down_list = Glib::RefPtr<Gtk::ListStore>::cast_dynamic(builder->get_object("downloadList"));
 			}
-			fc_ok->signal_clicked().connect(sigc::mem_fun(*this, &p2p_main::addseed));
-			new_file->signal_clicked().connect(sigc::mem_fun(*fc, &Gtk::FileChooserDialog::show));
-			fc_close->signal_clicked().connect(sigc::mem_fun(*fc, &Gtk::FileChooserDialog::hide));
-			download->signal_clicked().connect(sigc::mem_fun(*port_dialog, &Gtk::Dialog::show));
-			close_port->signal_clicked().connect(sigc::mem_fun(*port_dialog, &Gtk::Dialog::hide));
-			ok_port->signal_clicked().connect(sigc::mem_fun(*this, &p2p_main::add_download));
-			w->show();
+			fc_ok->signal_clicked().connect(sigc::mem_fun(this, &p2p_main::addseed));
+			new_file->signal_clicked().connect(sigc::mem_fun(fc, &Gtk::FileChooserDialog::show));
+			fc_close->signal_clicked().connect(sigc::mem_fun(fc, &Gtk::FileChooserDialog::hide));
+			download->signal_clicked().connect(sigc::mem_fun(port_dialog, &Gtk::Dialog::show));
+			close_port->signal_clicked().connect(sigc::mem_fun(port_dialog, &Gtk::Dialog::hide));
+			ok_port->signal_clicked().connect(sigc::mem_fun(this, &p2p_main::add_download));
+			taddr_next->signal_clicked().connect(sigc::mem_fun(this, &p2p_main::startmain));
+			taddr_dialog->show();
 			run();
 		}
 };
 int main(int argc, char** argv) {
-	auto self = p2p_main(argc, argv);
+	p2p_main self(argc, argv);
 	return 0;
 }

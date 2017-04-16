@@ -82,7 +82,7 @@ int main() {
 	init_winsock();
 	std::forward_list<download> trackers;
 	auto sock = socket::socket(AF_INET, SOCK_DGRAM, 0);
-	util::sockaddr addr({ 127,0,0,1 }, 16673);
+	util::sockaddr addr({ 0,0,0,0 }, 16673);
 	std::cout << "main: " << bind(sock, &addr, sizeof(addr)) << '\n';
 	util::sockaddr client;
 	int fromlen = sizeof(client);

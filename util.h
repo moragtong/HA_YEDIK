@@ -24,10 +24,12 @@ namespace socket {
 #endif
 }
 namespace util {
-	class ip4addr {
-	private:
+	struct ip4addr {
 		char _addr[4];
-	public:
+		ip4addr() {}
+		ip4addr(unsigned long raw) {
+			(unsigned long&)*_addr = raw;
+		}
 		ip4addr(char num1, char num2, char num3, char num4)
 			: _addr{ num1, num2, num3, num4 } {
 		}

@@ -38,8 +38,8 @@ class p2p_client : protected p2p_socket {
 						if (fhandle) {
 							std::cout << "seed-fhandle: " << recvd_com.param;
 							fseek(fhandle, recvd_com.param*buffsize, SEEK_SET);
-							fread(buff, sizeof(char), sizeof(buff) / sizeof(char), fhandle);
-							socket::sendto(sock, buff, sizeof(buff), 0, &client, sizeof(client));
+							auto red = fread(buff, 1, sizeof(buff), fhandle);
+							socket::sendto(sock, buff, red, 0, &client, sizeof(client));
 							fclose(fhandle);
 						} else
 							puts("seed file shite");
@@ -70,20 +70,21 @@ class p2p_client : protected p2p_socket {
 					auto check = recvfrom(sock, buff, sizeof(buff), 0, 0, 0);
 					if (check == -1) {
 						std::cout << "recv_file: " << WSAGetLastError() << ' ' << check << '\n';
-						clients.erase(clients.data() + i);
-						if (clients.empty())
-							return 2;
-						relib.erase_at(i);
-					} else {
 						if (relib[i])
 							relib[i]--;
 						else {
-							pkt_msg.param++;
-							fwrite(buff, sizeof(char), sizeof(buff) / sizeof(char), fhandle);
-							row_ref->set_value(3, guint(pkt_msg.param * 100 / psize));
+							clients.erase(clients.data() + i);
+							if (clients.empty())
+								return 2;
+							relib.erase_at(i);
+							continue;
 						}
-						i = (i + 1) % clients.size();
+					} else {
+						++pkt_msg.param;
+						fwrite(buff, 1, check, fhandle);
+						row_ref->set_value(3, guint(pkt_msg.param * 100 / psize));
 					}
+					i = (i + 1) % clients.size();
 				}
 				fclose(fhandle);
 				return 0;
@@ -127,7 +128,7 @@ class p2p_client : protected p2p_socket {
 		Gtk::TreeIter row_ref;
 		Glib::ustring full_filename;
 	public:
-		void set_row(Gtk::TreeIter& tr) {
+		void set_row(Gtk::TreeIter&& tr) {
 			row_ref = tr;
 		}
 		void init_filename(const Glib::ustring& _name) {
@@ -140,8 +141,8 @@ class p2p_client : protected p2p_socket {
 			int rc = stat(_name.c_str(), &stat_buf);
 			f.size = rc == 0 ? stat_buf.st_size : 0;
 		}
-		p2p_client()
-			: tracker({ 127,0,0,1 }, 16673),
+		explicit p2p_client(ip4addr taddr)
+			: tracker(taddr, 16673),
 			seeding(false) {
 		}
 		const util::sockaddr& get_tracker() {
@@ -149,7 +150,7 @@ class p2p_client : protected p2p_socket {
 		}
 		void init() {
 			sock = socket::socket(AF_INET, SOCK_DGRAM, 0);
-			util::sockaddr sname({ 127,0,0,1 }, 0);
+			util::sockaddr sname({ 0,0,0,0 }, 0);
 			std::cout << bind(sock, &sname, sizeof(sname));
 			int p = sizeof(sname);
 			getsockname(sock, &sname, &p);
