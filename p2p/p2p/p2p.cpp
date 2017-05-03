@@ -11,42 +11,15 @@
 #include <gtkmm\liststore.h>
 #include <gtkmm\filechooserdialog.h>
 #include <gtkmm\spinbutton.h>
-//#include <gtkmm\box.h>
 #include "p2p_client.h"
-class session : private p2p_client {
-	private:
-		void start_download(unsigned short _port) {
-			init();
-			start(_port);
-		}
-		void start_new_seed() {
-			init();
-			new_seed();
-		}
-	public:
-		/*filedata& get_filedata() {
-			return f;
-		}*/
-		using p2p_client::p2p_client;
-		using p2p_client::init_filename;
-		using p2p_client::set_row;
-		auto port() {
-			return get_tracker().port();
-		}
-		auto start_download_async(unsigned short _port) {
-			return std::thread(&session::start_download, *this, _port);
-		}
-		auto start_new_seed_async() {
-			return std::thread(&session::start_new_seed, *this);
-		}
-		/*~session() {
-			puts("session destructed");
-		}*/
-};
+/**
+ * \class p2p_main
+ * \brief	GUI for managing P2P downloads.
+*/
 class p2p_main : public Gtk::Main {
 	private:
 		ip4addr tracker_addr;
-		std::forward_list<std::thread> sessions;
+		std::forward_list<std::thread> p2p_clients;
 		Gtk::Window *w;
 		Glib::RefPtr<Gtk::ListStore> down_list;
 		Gtk::ToolButton *new_file, *download;
@@ -54,29 +27,41 @@ class p2p_main : public Gtk::Main {
 		Gtk::Button *fc_ok, *fc_close, *close_port, *ok_port, *taddr_next;
 		Gtk::SpinButton *get_port, *ips[4];
 		Gtk::Dialog *port_dialog, *taddr_dialog;
-		//Gtk::Box *taddr_vbox;
+		/**
+		 * \brief	An event handler that starts a new seed.
+		 * An event handler that starts a new seed from a file chosen by a FileChooserDialog.
+		 * Adds a new client to the clients list and starts seeding on a separate thread.
+		*/
 		void addseed() {
-			Glib::ustring filename;
-			filename = fc->get_filename();
+			auto filename = fc->get_filename();
 			if (!filename.empty()) {
-				session s(tracker_addr);
 				fc->hide();
-				//std::cout << sessions. << '\n';
-				s.init_filename(filename);
-				s.set_row(down_list->append());
-				sessions.push_front(std::move(s.start_new_seed_async()));
+				p2p_clients.push_front(
+					p2p_client(tracker_addr, down_list->append())
+						.set_filename(filename)
+						.start_new_seed_async()
+				);
 			}
 		}
+		/**
+		 * \brief	An event handler that starts a new download.
+		 * An event handler that starts a new download from a port specified by a SpinButton.
+		 * Adds a new client to the clients list and starts downloading (and on success seeding) on a separate thread.
+		*/
 		void add_download() {
 			auto port = get_port->get_value_as_int();
 			if (port >= 2000) {
 				port_dialog->hide();
-				//std::cout << sessions.size() << '\n';
-				session s(tracker_addr);
-				s.set_row(down_list->append());
-				sessions.push_front(std::move(s.start_download_async(port)));
+				p2p_clients.push_front(
+					p2p_client(tracker_addr, down_list->append())
+						.start_download_async(port)
+				);
 			}
 		}
+		/**
+		 * \brief	Initializes the main window.
+		 * After the default tracker's address has been specified in 4 SpinButton-s the main window is shown.
+		*/
 		void startmain() {
 			taddr_dialog->hide();
 			auto i = ips;
@@ -89,7 +74,11 @@ class p2p_main : public Gtk::Main {
 			w->show();
 		}
 	public:
-		p2p_main(int argc, char** argv)
+		/**
+		 * \brief	Starts the application.
+		 * Initializes the GUI and connects the signals to the corresponding procedures.
+		*/
+		p2p_main(int argc, char **argv)
 			: Gtk::Main(argc, argv) {
 			{
 				init_winsock();
@@ -112,7 +101,6 @@ class p2p_main : public Gtk::Main {
 				builder->get_widget("port_dialog", port_dialog);
 				builder->get_widget("port_spin", get_port);
 				builder->get_widget("continue", taddr_next);
-				//builder->get_widget("taddr_vbox", taddr_vbox);
 				builder->get_widget("taddr_dialog", taddr_dialog); 
 				{
 					char ip_names[] = "ip1";

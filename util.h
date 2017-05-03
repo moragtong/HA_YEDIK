@@ -9,11 +9,18 @@ and maybe maybe maybe to Mac*/
 #include <cstring>
 #include <cstdlib>
 #endif
-
-//#include <bitset>
+enum { CLN_NUM = 32, TIMEOUT = 1500 };
+enum trk_com_enum : char { ADD, REMOVE, LIST };
+struct trk_com {
+	trk_com_enum command;
+	//unsigned long param;
+};
 namespace socket {
 #ifdef WIN32
 #include <WinSock2.h>
+	/**
+	 * \brief	Initializes WinSock.
+	*/
 	WSADATA init_winsock() {
 		WSADATA wsaData;
 		socket::WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -23,7 +30,13 @@ namespace socket {
 #include <sys/socket.h>
 #endif
 }
+
 namespace util {
+	/**
+	 * \class ip4addr
+	 * \brief	IPV4 address
+	 * Represents an IPV4 address.
+	*/
 	struct ip4addr {
 		char _addr[4];
 		ip4addr() {}
@@ -76,6 +89,26 @@ namespace util {
 	};
 	struct p2p_socket {
 		socket::SOCKET sock;
+		/**
+		 * \brief	Initializes the client.
+		 * Initializes the socket to UDP/IP.
+		 * Binds the socket to a random port and prints it for debug purposes.
+		*/
+		void init() {
+			sock = socket::socket(AF_INET, SOCK_DGRAM, 0);
+			util::sockaddr addr({ 0,0,0,0 }, 0);
+			std::cout << bind(sock, &addr, sizeof(addr));
+			int p = sizeof(addr);
+			getsockname(sock, &addr, &p);
+			std::cout << "sock port: " << addr.port() << '\n';
+			settimeout(0, TIMEOUT);
+		}
+		/**
+		 * \brief	Sets the timeout.
+		 * Sets the timeout of the socket using the native API.
+		 * \param	sec	the seconds
+		 * \param	usec	the miliseconds
+		*/
 		int settimeout(unsigned long sec, unsigned long usec) {
 			#ifdef _WIN32
 			const unsigned long tv = sec * 1000 + usec;

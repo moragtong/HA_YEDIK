@@ -7,31 +7,29 @@
 #include <algorithm>
 using namespace util;
 using namespace socket;
-enum { CLN_NUM = 32, TIMEOUT = 1500 };
-enum trk_com_enum : char { ADD, REMOVE, LIST };
-struct trk_com {
-	trk_com_enum command;
-	//unsigned long param;
-};
 const char * enum_repr[]{ "ADD", "REMOVE", "LIST" };
+/**
+ * \class p2p_tracker
+ * \brief Coordinates between clients.
+*/
 struct p2p_tracker : protected p2p_socket {
 	p2p_tracker() {}
+	/**
+	 * \brief	Initializes the tracker and starts it.
+	 * \param	starter	first client to seed.
+	*/
 	void startall(util::sockaddr starter) {
 		init();
 		start(starter);
 	}
-	unsigned short init() {
-		sock = socket::socket(AF_INET, SOCK_DGRAM, 0);
-		util::sockaddr addr({ 0,0,0,0 }, 0);
-		std::cout << bind(sock, &addr, sizeof(addr));
-		int p = sizeof(addr);
-		getsockname(sock, &addr, &p);
-		std::cout << "tracker sock port: " << addr.port() << '\n';
-		return addr._port();
-	}
+	/**
+	 * \brief	Starts the tracker
+	 * Sends an empty packet until a confirmation (another empty packet) is received.
+	 * Receives commands according to the protocol and acts accordingly.
+	 * \param	starter	first client to seed.
+	*/
 	void start(const util::sockaddr& starter) {
 		{
-			settimeout(0, TIMEOUT);
 			char count = 4;
 			int status;
 			do {
@@ -50,7 +48,6 @@ struct p2p_tracker : protected p2p_socket {
 				i = 0;
 			recvfrom(sock, (char*)&com, sizeof(com), 0, &client, &fromlen);
 			auto wsc = socket::WSAGetLastError();
-
 			std::cout << wsc << ' ';
 			if (com.command == LIST)
 				sendto(sock, (char*)(clients.data() + i), min(CLN_NUM, clients.size()) * sizeof(util::sockaddr), 0, &client, sizeof(client));
@@ -73,6 +70,10 @@ struct p2p_tracker : protected p2p_socket {
 		}
 	}
 };
+/**
+ * \class download
+ * Represents a tracker running on a seperate thread.
+*/
 struct download {
 	std::thread thread;
 	p2p_tracker tracker;
@@ -80,6 +81,11 @@ struct download {
 		: tracker(), thread(&p2p_tracker::startall, &tracker, starter) {
 	}
 };
+/**
+ * \brief	A default tracker that launches other trackers.
+ * Holds a list of downloads. Uses UDP/IP.
+ * Launches other trackers in a loop.
+*/
 int main() {
 	init_winsock();
 	std::forward_list<download> trackers;
