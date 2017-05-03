@@ -1,4 +1,4 @@
-# p2p_michael_ori <br />
+# HA_YEDIK <br />
 The Goal <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To create a simple lightweight client dependent file sharing system using P2P networking. <br />
 Description <br />
