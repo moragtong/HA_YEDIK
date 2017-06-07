@@ -7,28 +7,20 @@
 #include <algorithm>
 using namespace util;
 using namespace socket;
-const char * enum_repr[]{ "ADD", "REMOVE", "LIST" };
+const char *enum_repr[]{ "ADD", "REMOVE", "LIST" };
 /**
  * \class p2p_tracker
  * \brief Coordinates between clients.
 */
 struct p2p_tracker : protected p2p_socket {
-	p2p_tracker() {}
 	/**
-	 * \brief	Initializes the tracker and starts it.
-	 * \param	starter	first client to seed.
+	* \brief	Starts the tracker
+	* Sends an empty packet until a confirmation (another empty packet) is received.
+	* Receives commands according to the protocol and acts accordingly.
+	* \param	starter	first client to seed.
 	*/
-	void startall(util::sockaddr starter) {
+	void startall(const util::sockaddr& starter) {
 		init();
-		start(starter);
-	}
-	/**
-	 * \brief	Starts the tracker
-	 * Sends an empty packet until a confirmation (another empty packet) is received.
-	 * Receives commands according to the protocol and acts accordingly.
-	 * \param	starter	first client to seed.
-	*/
-	void start(const util::sockaddr& starter) {
 		{
 			char count = 4;
 			int status;
@@ -71,24 +63,13 @@ struct p2p_tracker : protected p2p_socket {
 	}
 };
 /**
- * \class download
- * Represents a tracker running on a seperate thread.
-*/
-struct download {
-	std::thread thread;
-	p2p_tracker tracker;
-	download(const util::sockaddr& starter)
-		: tracker(), thread(&p2p_tracker::startall, &tracker, starter) {
-	}
-};
-/**
  * \brief	A default tracker that launches other trackers.
  * Holds a list of downloads. Uses UDP/IP.
  * Launches other trackers in a loop.
 */
 int main() {
 	init_winsock();
-	std::forward_list<download> trackers;
+	std::forward_list<std::thread> trackers;
 	auto sock = socket::socket(AF_INET, SOCK_DGRAM, 0);
 	util::sockaddr addr({ 0,0,0,0 }, 16673);
 	std::cout << "main: " << bind(sock, &addr, sizeof(addr)) << '\n';
@@ -96,7 +77,9 @@ int main() {
 	int fromlen = sizeof(client);
 	for (;;) {
 		recvfrom(sock, 0, 0, 0, &client, &fromlen);
-		trackers.emplace_front(client);
+		trackers.emplace_front([client] {
+			p2p_tracker().startall(client);
+		});
 	}
 	return 0;
 }

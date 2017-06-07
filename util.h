@@ -1,14 +1,6 @@
 #pragma once
 #include <iostream>
 #include <thread>
-/*These two are included with MSVC Runtime.
-Soon I'll move to MinGW, and I'll be able to port the
-project to Linux (sys/socket.h instead of winsock2.h)
-and maybe maybe maybe to Mac*/
-#ifndef WIN32
-#include <cstring>
-#include <cstdlib>
-#endif
 enum { CLN_NUM = 32, TIMEOUT = 1500 };
 enum trk_com_enum : char { ADD, REMOVE, LIST };
 struct trk_com {
@@ -16,19 +8,15 @@ struct trk_com {
 	//unsigned long param;
 };
 namespace socket {
-#ifdef WIN32
-#include <WinSock2.h>
+	#include <WinSock2.h>
 	/**
-	 * \brief	Initializes WinSock.
+		* \brief	Initializes WinSock.
 	*/
 	WSADATA init_winsock() {
 		WSADATA wsaData;
 		socket::WSAStartup(MAKEWORD(2, 2), &wsaData);
 		return wsaData;
 	}
-#else
-#include <sys/socket.h>
-#endif
 }
 
 namespace util {
@@ -96,7 +84,7 @@ namespace util {
 		*/
 		void init() {
 			sock = socket::socket(AF_INET, SOCK_DGRAM, 0);
-			util::sockaddr addr({ 0,0,0,0 }, 0);
+			util::sockaddr addr{ {0,0,0,0}, 0 };
 			std::cout << bind(sock, &addr, sizeof(addr));
 			int p = sizeof(addr);
 			getsockname(sock, &addr, &p);

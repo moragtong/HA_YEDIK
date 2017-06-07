@@ -1,10 +1,6 @@
 #pragma once
 #include <util.h>
-/**
-* \defgroup Protocol
-* @{
-*/
-enum { buffsize = 1492 };
+enum { BUFFSIZE = 1492 };
 struct filedata {
 	unsigned long size;
 	char name[FILENAME_MAX];
@@ -14,4 +10,3 @@ struct cln_com {
 	cln_com_enum command;
 	unsigned long param = 0;
 };
-/**@}*/

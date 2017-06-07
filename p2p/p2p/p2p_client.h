@@ -9,7 +9,6 @@ using namespace socket;
 */
 class p2p_client : protected p2p_socket {
 	private:
-		bool seeding;
 		etl::vector<util::sockaddr, CLN_NUM> clients;
 		util::sockaddr tracker;
 		filedata f;
@@ -39,21 +38,22 @@ class p2p_client : protected p2p_socket {
 		 * Waits for a client to request a file piece or for an internal signal to stop doing so.
 		*/
 		void _seed() {
-			const char * enum_rep[]{ "FILEDATA", "PKT" };
+			static const char *const enum_rep[]{ "FILEDATA", "PKT" };
 			puts("seed running");
+			settimeout(0, 0);
 			cln_com recvd_com;
 			util::sockaddr client;
-			const char *open_name = full_filename.empty() ? f.name : full_filename.c_str();
-			while (seeding) {
+			const char *const open_name = full_filename.empty() ? f.name : full_filename.c_str();
+			for (;;) {
 				int fromlen = sizeof(client);
 				auto got = recvfrom(sock, (char*)&recvd_com, sizeof(recvd_com), 0, &client, &fromlen);
 				if (got > 0) {
-					std::cout << socket::WSAGetLastError() << '\n';
+					std::cout << recvd_com.param << ',';
 					if (recvd_com.command == PKT) {
-						char buff[buffsize];
+						char buff[BUFFSIZE];
 						auto fhandle = fopen(open_name, "rb");
 						if (fhandle) {
-							fseek(fhandle, recvd_com.param*buffsize, SEEK_SET);
+							fseek(fhandle, recvd_com.param*BUFFSIZE, SEEK_SET);
 							auto red = fread(buff, 1, sizeof(buff), fhandle);
 							socket::sendto(sock, buff, red, 0, &client, sizeof(client));
 							fclose(fhandle);
@@ -61,14 +61,14 @@ class p2p_client : protected p2p_socket {
 							puts("seed file shite");
 					} else if (recvd_com.command == FILEDATA)
 						socket::sendto(sock, (char*)&f, sizeof(f.size) + strlen(f.name) + 1, 0, &client, sizeof(client));
-					if (recvd_com.command > 1)
+					/*if (recvd_com.command > 1)
 						std::cout << "seed command shite " << recvd_com.command;
 					else
 						std::cout << enum_rep[recvd_com.command];
-					std::cout << '\n';
+					std::cout << '\n';*/
 				}
 			}
-			puts("_seed stopped");
+			//puts("_seed stopped");
 		}
 		/**
 		 * \brief	Receives a file.
@@ -80,9 +80,9 @@ class p2p_client : protected p2p_socket {
 			auto fhandle = fopen(f.name, "wb");
 			std::cout << "recv-fhandle: " << fhandle;
 			if (fhandle) {
-				auto psize = f.size / buffsize + (f.size % buffsize ? 1 : 0);
+				auto psize = f.size / BUFFSIZE + (f.size % BUFFSIZE ? 1 : 0);
 				cln_com pkt_msg{ PKT };
-				char buff[buffsize];
+				char buff[BUFFSIZE];
 				etl::array<char, CLN_NUM> relib;
 				relib.fill(3);
 				for (BYTE i = 0; pkt_msg.param < psize; ) {
@@ -148,47 +148,10 @@ class p2p_client : protected p2p_socket {
 				row_ref->set_value(1, gulong(f.size));
 				row_ref->set_value(2, guint((unsigned int)tracker.port()));
 				puts(f.name);
-			} else {
-				puts("shit request_filedata");
-				return false;
+				return true;
 			}
-			return true;
-		}
-		/**
-		 * Starts seeding for the first time.
-		*/
-		void first_seed() {
-			seeding = true;
-			_seed();
-		}
-		/**
-		 * \brief	Initializes the client.
-		 * Sets the timeout to TIMEOUT.
-		*/
-		/**
-		 * \brief	Starts a completely new seed.
-		 * Gets a port from a newly created tracker which will be used for future P2P communication.
-		 * Sets the corresponding row in the GUI accordingly (name, size, port and progress (to a 100%))
-		*/
-		void new_seed() {
-			row_ref->set_value(0, Glib::ustring(f.name));
-			row_ref->set_value(1, gulong(f.size));
-			row_ref->set_value(3, guint(100));
-			int check;
-			int tsize = sizeof(tracker);
-			for (unsigned int count = 4; ; count--) {
-				sendto(sock, 0, 0, 0, &tracker, sizeof(tracker));
-				check = recvfrom(sock, 0, 0, 0, &tracker, &tsize);
-				if (!count)
-					return;
-				if (check >= 0)
-					break;
-			}
-			sendto(sock, 0, 0, 0, &tracker, sizeof(tracker));
-			auto newport = tracker.port();
-			std::cout << "new_seed: " << WSAGetLastError() << ' ' << newport << '\n';
-			row_ref->set_value(2, guint((unsigned int)newport));
-			first_seed();
+			puts("shit request_filedata");
+			return false;
 		}
 		/**
 		 * Gets a list of the current seeders from the tracker.
@@ -209,12 +172,14 @@ class p2p_client : protected p2p_socket {
 			} else
 				puts("request_list why");
 		}
+	public:
 		/**
 		 * \brief	Starts a new download from a given port.
 		 * Requests the seeders list, the file's data, and finally the file itself.
 		 * \param	_port	a tracker port from which to get the seeders list.
 		*/
-		void start(unsigned short _port) {
+		void start_download(unsigned short _port) {
+			init();
 			tracker.port(_port);
 			bool reqf = false;
 			for (int count = 4; !reqf && count; --count) {
@@ -227,25 +192,38 @@ class p2p_client : protected p2p_socket {
 					request_list();
 					recv_stat = _recv();
 				}
-				if (!recv_stat)
-					seed();
+				if (!recv_stat) {
+					command_tracker(ADD);
+					_seed();
+				}
 			}
 		}
 		/**
-		 * Begins a download.
-		*/
-		void start_download(unsigned short _port) {
-			init();
-			start(_port);
-		}
-		/**
-		 * Begins a new seed.
+		* \brief	Starts a completely new seed.
+		* Gets a port from a newly created tracker which will be used for future P2P communication.
+		* Sets the corresponding row in the GUI accordingly (name, size, port and progress (to a 100%))
 		*/
 		void start_new_seed() {
 			init();
-			new_seed();
+			row_ref->set_value(0, Glib::ustring(f.name));
+			row_ref->set_value(1, gulong(f.size));
+			row_ref->set_value(3, guint(100));
+			int check;
+			int tsize = sizeof(tracker);
+			for (unsigned int count = 4; ; count--) {
+				sendto(sock, 0, 0, 0, &tracker, sizeof(tracker));
+				check = recvfrom(sock, 0, 0, 0, &tracker, &tsize);
+				if (!count)
+					return;
+				if (check >= 0)
+					break;
+			}
+			sendto(sock, 0, 0, 0, &tracker, sizeof(tracker));
+			auto newport = tracker.port();
+			std::cout << "new_seed: " << WSAGetLastError() << ' ' << newport << '\n';
+			row_ref->set_value(2, guint((unsigned int)newport));
+			_seed();
 		}
-	public:
 		/**
 		 * Creates a new p2p_client object.
 		 * \param	taddr	the default tracker's address.
@@ -253,7 +231,6 @@ class p2p_client : protected p2p_socket {
 		*/
 		p2p_client(ip4addr taddr, Gtk::TreeIter&& tr)
 			: tracker(taddr, 16673),
-			seeding(false),
 			row_ref(tr) {
 		}
 		/**
@@ -272,38 +249,7 @@ class p2p_client : protected p2p_socket {
 			f.size = rc == 0 ? stat_buf.st_size : 0;
 			return *this;
 		}
-		/**
-		 * Lets other clients download from the current client.
-		*/
-		void seed() {
-			if (!seeding) {
-				command_tracker(ADD);
-				first_seed();
-			}
-		}
-		/**
-		 * Prevents other clients from downloading from the current client.
-		*/
-		void stop_seeding() {
-			if (seeding) {
-				seeding = false;
-				command_tracker(REMOVE);
-			}
-		}
-		/**
-		 * Starts a new download on a separate thread.
-		*/
-		auto start_download_async(unsigned short _port) {
-			return std::thread(&p2p_client::start_download, *this, _port);
-		}
-		/**
-		* Lets other clients download from the current client on a seperate thread.
-		*/
-		auto start_new_seed_async() {
-			return std::thread(&p2p_client::start_new_seed, *this);
-		}
 		~p2p_client() {
-			puts(seeding ? "seeding" : "not seeding");
 			puts("client destructed");
 		}
 };

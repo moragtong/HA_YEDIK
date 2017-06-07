@@ -19,7 +19,7 @@
 class p2p_main : public Gtk::Main {
 	private:
 		ip4addr tracker_addr;
-		std::forward_list<std::thread> p2p_clients;
+		std::forward_list<std::thread> clients;
 		Gtk::Window *w;
 		Glib::RefPtr<Gtk::ListStore> down_list;
 		Gtk::ToolButton *new_file, *download;
@@ -32,15 +32,14 @@ class p2p_main : public Gtk::Main {
 		 * An event handler that starts a new seed from a file chosen by a FileChooserDialog.
 		 * Adds a new client to the clients list and starts seeding on a separate thread.
 		*/
-		void addseed() {
-			auto filename = fc->get_filename();
-			if (!filename.empty()) {
+		void add_seed() {
+			if (!fc->get_filename().empty()) {
 				fc->hide();
-				p2p_clients.push_front(
+				clients.emplace_front([this] {
 					p2p_client(tracker_addr, down_list->append())
-						.set_filename(filename)
-						.start_new_seed_async()
-				);
+						.set_filename(fc->get_filename())
+						.start_new_seed();
+				});
 			}
 		}
 		/**
@@ -49,13 +48,12 @@ class p2p_main : public Gtk::Main {
 		 * Adds a new client to the clients list and starts downloading (and on success seeding) on a separate thread.
 		*/
 		void add_download() {
-			auto port = get_port->get_value_as_int();
-			if (port >= 2000) {
+			if (get_port->get_value_as_int() >= 2000) {
 				port_dialog->hide();
-				p2p_clients.push_front(
+				clients.emplace_front([this] {
 					p2p_client(tracker_addr, down_list->append())
-						.start_download_async(port)
-				);
+						.start_download(get_port->get_value_as_int());
+				});
 			}
 		}
 		/**
@@ -114,7 +112,7 @@ class p2p_main : public Gtk::Main {
 				}
 				down_list = Glib::RefPtr<Gtk::ListStore>::cast_dynamic(builder->get_object("downloadList"));
 			}
-			fc_ok->signal_clicked().connect(sigc::mem_fun(this, &p2p_main::addseed));
+			fc_ok->signal_clicked().connect(sigc::mem_fun(this, &p2p_main::add_seed));
 			new_file->signal_clicked().connect(sigc::mem_fun(fc, &Gtk::FileChooserDialog::show));
 			fc_close->signal_clicked().connect(sigc::mem_fun(fc, &Gtk::FileChooserDialog::hide));
 			download->signal_clicked().connect(sigc::mem_fun(port_dialog, &Gtk::Dialog::show));
@@ -126,6 +124,6 @@ class p2p_main : public Gtk::Main {
 		}
 };
 int main(int argc, char** argv) {
-	p2p_main self(argc, argv);
+	p2p_main(argc, argv);
 	return 0;
 }
