@@ -3,9 +3,42 @@
 
 #include "stdafx.h"
 #include "resource.h"
-
 #include "socket.h"
+#ifdef _WIN32 // _WIN32 is defined by many compilers available for the Windows operating system, but not by others.
+#pragma comment(lib, "Ws2_32.lib")
+#include <Ws2tcpip.h>
+#define WIN_SOCK_DECLARE		WSADATA wsaData;
 
+//********* WIN_SOCK_INIT & WIN_SOCK_SHUTDOWN should be called for each thread
+#define WIN_SOCK_INIT			WSAStartup(MAKEWORD(2,2), &wsaData); 
+#define WIN_SOCK_SHUTDOWN		WSACleanup();
+//*****************************************************************************
+
+#define GET_LAST_SOCKET_ERROR	WSAGetLastError();
+#define socklen_t		int 
+
+#else
+
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <netdb.h>
+
+#define WIN_SOCK_DECLARE
+#define WIN_SOCK_INIT
+#define WIN_SOCK_SHUTDOWN
+
+//	#define GET_LAST_SOCKET_ERROR	errno;
+#define SOCKET 			int
+#define INVALID_SOCKET		(-1)
+
+#endif
 namespace Socket {
 	namespace detail {
 		SocketBase::SocketBase() {
@@ -104,10 +137,10 @@ namespace Socket {
 	}
 	int UDP::RecvFrom(void * pBuff, size_t nBuffSize, sockaddr_in *client_addr, int nFlag) {
 		socklen_t nLen = sizeof(client_addr);
-		return ::recvfrom(sock, (char*)pBuff, nBuffSize, nFlag, (struct sockaddr *)client_addr, &nLen);
+		return ::recvfrom(sock, (char*)pBuff, nBuffSize, nFlag, (::sockaddr *)client_addr, &nLen);
 	}
-	int UDP::SendTo(void * pBuff, size_t nBuffSize, sockaddr_in &client_addr, int nFlag) {
-		return ::sendto(sock, (const char*)pBuff, nBuffSize, nFlag, (struct sockaddr *)&client_addr, sizeof(client_addr));
+	int UDP::SendTo(void * pBuff, size_t nBuffSize, const sockaddr_in &client_addr, int nFlag) {
+		return ::sendto(sock, (const char*)pBuff, nBuffSize, nFlag, (const ::sockaddr *)&client_addr, sizeof(client_addr));
 	}
 }
 #undef LZZ_INLINE

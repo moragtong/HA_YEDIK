@@ -3,40 +3,6 @@
 #pragma once
 #ifndef LZZ_socket_h
 #define LZZ_socket_h
-#ifdef _WIN32 // _WIN32 is defined by many compilers available for the Windows operating system, but not by others.
-#pragma comment(lib, "Ws2_32.lib")
-#define WIN_SOCK_DECLARE		WSADATA wsaData;
-
-//********* WIN_SOCK_INIT & WIN_SOCK_SHUTDOWN should be called for each thread
-#define WIN_SOCK_INIT			WSAStartup(MAKEWORD(2,2), &wsaData); 
-#define WIN_SOCK_SHUTDOWN		WSACleanup();
-//*****************************************************************************
-
-#define GET_LAST_SOCKET_ERROR	WSAGetLastError();
-#define socklen_t		int 
-
-#else
-
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <netdb.h>
-
-#define WIN_SOCK_DECLARE
-#define WIN_SOCK_INIT
-#define WIN_SOCK_SHUTDOWN
-
-//	#define GET_LAST_SOCKET_ERROR	errno;
-#define SOCKET 			int
-#define INVALID_SOCKET		(-1)
-
-#endif
 namespace Socket {
 	namespace detail {
 		class SocketBase {
@@ -78,8 +44,8 @@ namespace Socket {
 	struct UDP : detail::SocketBase {
 		using SocketBase::Bind;
 		bool Create();
-		int RecvFrom(void * pBuff, size_t nBuffSize, ::sockaddr_in *client_addr, int nFlag = 0);
-		int SendTo(void * pBuff, size_t nBuffSize, ::sockaddr_in &client_addr, int nFlag = 0);
+		int RecvFrom(void * pBuff, size_t nBuffSize, ::sockaddr_in* client_addr, int nFlag = 0);
+		int SendTo(void * pBuff, size_t nBuffSize, const ::sockaddr_in &client_addr, int nFlag = 0);
 	};
 }
 #undef LZZ_INLINE
