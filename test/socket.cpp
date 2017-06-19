@@ -6,7 +6,6 @@
 #include "socket.h"
 #ifdef _WIN32 // _WIN32 is defined by many compilers available for the Windows operating system, but not by others.
 #pragma comment(lib, "Ws2_32.lib")
-#include <Ws2tcpip.h>
 #define WIN_SOCK_DECLARE		WSADATA wsaData;
 
 //********* WIN_SOCK_INIT & WIN_SOCK_SHUTDOWN should be called for each thread

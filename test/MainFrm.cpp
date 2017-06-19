@@ -21,8 +21,9 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	m_hWndClient = m_view.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | LVS_REPORT | LVS_SHOWSELALWAYS, WS_EX_CLIENTEDGE);
 	m_view.AddColumn(_T("name"), 0);
 	m_view.AddColumn(_T("size"), 1);
-	m_view.AddColumn(_T("port"), 2);
-	m_view.AddColumn(_T("progress"), 3);
+	m_view.AddColumn(_T("ip"), 2);
+	m_view.AddColumn(_T("port"), 3);
+	m_view.AddColumn(_T("progress"), 4);
 	UIAddToolBar(m_hWndToolBar);
 	UISetCheck(ID_VIEW_TOOLBAR, 1);
 	// register object for message filtering and idle updates
