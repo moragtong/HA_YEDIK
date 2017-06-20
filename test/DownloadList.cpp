@@ -1,14 +1,13 @@
-// testView.cpp : implementation of the CTestView class
+// testView.cpp : implementation of the CDownloadList class
 //
 /////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "resource.h"
 
-#include "testView.h"
+#include "DownloadList.h"
 
-BOOL CTestView::PreTranslateMessage(MSG* pMsg)
-{
+BOOL CDownloadList::PreTranslateMessage(MSG* pMsg) {
 	pMsg;
 	return FALSE;
 }

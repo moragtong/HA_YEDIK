@@ -1,16 +1,17 @@
 #include "stdafx.h"
 #include "resource.h"
 #include <vector.h>
-#include "testView.h"
+#include "DownloadList.h"
 #include "MainFrm.h"
 #include "P2PClient.h"
 
 
 P2PClient::P2PClient(CMainFrame& _main)
 	: m_main(_main),
-	m_idx(m_main.m_view.GetItemCount()) {
-	m_main.m_view.SetItemText(m_idx, 4, _T("0%"));
+	m_idx(m_main.m_downlist.GetItemCount()) {
+	m_main.m_downlist.SetItemText(m_idx, 4, _T("0%"));
 }
+
 bool P2PClient::RequestClientList() {
 	if (m_tracker.sin_port != 8513) { // htons(16673)
 		m_clients.resize(m_clients.capacity());
@@ -27,31 +28,33 @@ bool P2PClient::RequestClientList() {
 	}
 	return false;
 }
+
 bool P2PClient::RequestFileProps() {
 	ClnCom temp{ ClnCom::FILEDATA };
 	for (const auto &client : m_clients) {
 		m_sock.SendTo(&temp, sizeof(temp), client);
-		auto check = m_sock.RecvFrom(&m_fileprops, sizeof(m_fileprops), nullptr);
-		if (check) {
+		if (m_sock.RecvFrom(&m_fileprops, sizeof(m_fileprops), nullptr)) {
 			TCHAR buff[11];
 			_ltoa(m_fileprops.m_size, buff, 10);
 			//itoa(m_tracker.sin_port, m_port_str, 10); //not here!
 			//inet_pton(4, m_ip_str, &m_tracker.sin_addr); //not here!!
-			m_main.m_view.SetItemText(m_idx, 0, m_fileprops.m_name);
-			m_main.m_view.SetItemText(m_idx, 1, buff);
-			//m_main.m_view.SetItemText(m_idx, 2, m_ip_str); //not here!
-			//m_main.m_view.SetItemText(m_idx, 3, m_port_str); //not here!
+			m_main.m_downlist.SetItemText(m_idx, 0, m_fileprops.m_name);
+			m_main.m_downlist.SetItemText(m_idx, 1, buff);
+			//m_main.m_downlist.SetItemText(m_idx, 2, m_ip_str); //not here!
+			//m_main.m_downlist.SetItemText(m_idx, 3, m_port_str); //not here!
 			return true;
 		}
 	}
 	return false;
 }
+
 P2PClient::RecvResult P2PClient::RecvFileContents() {
 #ifdef _DEBUG
 	if (m_clients.empty())
 		return RecvResult::ERROR_NO_CLIENTS;
-	if (m_fd.is_open()) {
 #endif
+	std::ofstream fd(m_file_name_str);
+	if (fd.is_open()) {
 		ClnCom temp{ ClnCom::PKT };
 		char buff[BUFFSIZE];
 		etl::array<char, CLN_NUM> relib;
@@ -72,18 +75,16 @@ P2PClient::RecvResult P2PClient::RecvFileContents() {
 				} else {
 					temp.m_param += BUFFSIZE;
 					relib[i] = 3;
-					m_fd.write(buff, sizeof(buff));
+					fd.write(buff, sizeof(buff));
 					_itoa(temp.m_param * 100 / m_fileprops.m_size, buff, 10);
 					buff[strlen(buff)] = '%';
-					m_main.m_view.SetItemText(m_idx, 4, buff);
+					m_main.m_downlist.SetItemText(m_idx, 4, buff);
 				}
 				i = (i + 1) % m_clients.size();
 			} while (temp.m_param < m_fileprops.m_size);
 		}
-		m_fd.close();
+		fd.close();
 		return RecvResult::SUCCESS;
-#ifdef _DEBUG
 	}
 	return RecvResult::ERROR_FILEIO;
-#endif
 }

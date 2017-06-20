@@ -4,8 +4,8 @@
 #include "stdafx.h"
 
 #include "resource.h"
-
-#include "testView.h"
+#include "DownloadDialog.h"
+#include "DownloadList.h"
 #include "MainFrm.h"
 
 CAppModule _Module;
@@ -14,7 +14,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	HRESULT hRes = ::CoInitialize(NULL);
 	// If you are running on NT 4.0 or higher you can use the following call instead to 
 	// make the EXE free threaded. This means that calls come in on a random RPC thread.
-	//	HRESULT hRes = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
+	//HRESULT hRes = ::CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	ATLASSERT(SUCCEEDED(hRes));
 
 	// this resolves ATL window thunking problem when Microsoft Layer for Unicode (MSLU) is used
@@ -29,20 +29,18 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 	_Module.AddMessageLoop(&theLoop);
 
 	CMainFrame wndMain;
-
+	int nRet;
 	if (wndMain.CreateEx() == NULL) {
 		ATLTRACE(_T("Main window creation failed!\n"));
-		return 0;
+		nRet = 0;
+	} else {
+		wndMain.ShowWindow(nCmdShow);
+
+		nRet = theLoop.Run();
+		_Module.RemoveMessageLoop();
+
+		_Module.Term();
+		::CoUninitialize();
 	}
-
-	wndMain.ShowWindow(nCmdShow);
-
-	int nRet = theLoop.Run();
-
-	_Module.RemoveMessageLoop();
-
-	_Module.Term();
-	::CoUninitialize();
-
 	return nRet;
 }

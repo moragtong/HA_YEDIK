@@ -29,14 +29,12 @@ class P2PClient {
 	};
 	struct FileProps {
 		unsigned long m_size;
-		TCHAR m_name[FILENAME_MAX / 5];
+		TCHAR m_name[MAX_PATH / 5];
 	};
 
-	/*TCHAR m_file_name_str[FILENAME_MAX],
+	TCHAR m_file_name_str[MAX_PATH]/*,
 		m_ip_str[22],
-		m_port_str[6];*/
-
-	std::ofstream m_fd;
+		m_port_str[6]*/;
 	FileProps m_fileprops;
 	etl::vector<::sockaddr_in, 32> m_clients;
 	::sockaddr_in m_tracker;

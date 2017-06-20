@@ -208,6 +208,7 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DownloadDialog.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="P2PClient.cpp" />
     <ClCompile Include="socket.cpp" />
@@ -218,15 +219,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="test.cpp" />
-    <ClCompile Include="testView.cpp" />
+    <ClCompile Include="DownloadList.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DownloadDialog.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="P2PClient.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="socket.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="testView.h" />
+    <ClInclude Include="DownloadList.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="test.rc" />

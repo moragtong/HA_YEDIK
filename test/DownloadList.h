@@ -1,15 +1,15 @@
-// testView.h : interface of the CTestView class
+// testView.h : interface of the CDownloadList class
 //
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 
-struct CTestView : CWindowImpl<CTestView, CListViewCtrl> {
+struct CDownloadList final : CWindowImpl<CDownloadList, CListViewCtrl> {
 	DECLARE_WND_SUPERCLASS(NULL, CListViewCtrl::GetWndClassName())
 	
 	BOOL PreTranslateMessage(MSG* /*pMsg*/);
 
-	BEGIN_MSG_MAP(CTestView)
+	BEGIN_MSG_MAP(CDownloadList)
 	END_MSG_MAP()
 
 	// Handler prototypes (uncomment arguments if needed):

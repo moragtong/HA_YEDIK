@@ -11,7 +11,8 @@ struct CMainFrame final :
 
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
 	
-	CTestView m_view;
+	CDownloadList m_downlist;
+	std::forward_list<std::thread> m_down_thread_store;
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 	BOOL OnIdle();
@@ -23,7 +24,7 @@ struct CMainFrame final :
 	BEGIN_MSG_MAP(CMainFrame)
 		MESSAGE_HANDLER(WM_CREATE, OnCreate)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
-		COMMAND_ID_HANDLER(ID_APP_EXIT, OnFileExit)
+		COMMAND_ID_HANDLER(ID_DOWNLOAD_BUTTON, OnDownload)
 		CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
 		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
 	END_MSG_MAP()
@@ -35,5 +36,5 @@ struct CMainFrame final :
 
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
-	LRESULT OnFileExit(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };
