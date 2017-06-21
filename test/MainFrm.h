@@ -12,7 +12,7 @@ struct CMainFrame final :
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
 	
 	CDownloadList m_downlist;
-	std::forward_list<std::thread> m_down_thread_store;
+	etl::ivector<std::thread>& m_down_thread_store;
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 	BOOL OnIdle();
@@ -34,6 +34,7 @@ struct CMainFrame final :
 	//	LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 	//	LRESULT NotifyHandler(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& /*bHandled*/)
 
+	explicit CMainFrame(etl::ivector<std::thread>&);
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);

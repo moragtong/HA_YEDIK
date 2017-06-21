@@ -6,6 +6,10 @@
 #include "DownloadDialog.h"
 #include "DownloadList.h"
 #include "MainFrm.h"
+
+CMainFrame::CMainFrame(etl::ivector<std::thread>& down_thread_store)
+	: m_down_thread_store(down_thread_store) {
+}
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) {
 	if (CFrameWindowImpl<CMainFrame>::PreTranslateMessage(pMsg))
 		return TRUE;

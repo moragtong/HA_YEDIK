@@ -7,6 +7,9 @@
 
 #include "DownloadDialog.h"
 
+CDownloadDialog::CDownloadDialog(etl::ivector<std::thread>& down_thread_store)
+	: m_down_thread_store(down_thread_store) {
+}
 LRESULT CDownloadDialog::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
 	CenterWindow(GetParent());
 	return TRUE;

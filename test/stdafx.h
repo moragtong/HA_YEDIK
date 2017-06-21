@@ -22,7 +22,7 @@ extern CAppModule _Module;
 #include <atlctrls.h>
 #include <atldlgs.h>
 #include <fstream>
-#include <forward_list>
+#include <vector.h>
 #include <thread>
 #include "socket.h"
 
