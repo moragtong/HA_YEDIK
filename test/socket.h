@@ -34,7 +34,7 @@ namespace Socket {
 		};
 	}
 	struct TCPClient : detail::TCP {
-		int Connect(char const * pszAddr, unsigned short int nPort);
+		int Connect(char const *pszAddr, unsigned short int nPort);
 	};
 	struct TCPServer : detail::TCP {
 		using SocketBase::Bind;
@@ -44,8 +44,8 @@ namespace Socket {
 	struct UDP : detail::SocketBase {
 		using SocketBase::Bind;
 		bool Create();
-		int RecvFrom(void * pBuff, size_t nBuffSize, ::sockaddr_in* client_addr, int nFlag = 0);
-		int SendTo(void * pBuff, size_t nBuffSize, const ::sockaddr_in &client_addr, int nFlag = 0);
+		int RecvFrom(void *pBuff, size_t nBuffSize, ::sockaddr_in *client_addr, int nFlag = 0);
+		int SendTo(void *pBuff, size_t nBuffSize, const ::sockaddr_in &client_addr, int nFlag = 0);
 	};
 }
 #undef LZZ_INLINE

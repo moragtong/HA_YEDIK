@@ -27,7 +27,6 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 
 	CMessageLoop theLoop;
 	_Module.AddMessageLoop(&theLoop);
-
 	CMainFrame wndMain;
 	int nRet;
 	if (wndMain.CreateEx() == NULL) {

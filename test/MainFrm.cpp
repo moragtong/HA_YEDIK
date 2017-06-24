@@ -7,9 +7,8 @@
 #include "DownloadList.h"
 #include "MainFrm.h"
 
-CMainFrame::CMainFrame(etl::ivector<std::thread>& down_thread_store)
-	: m_down_thread_store(down_thread_store) {
-}
+CMainFrame::CMainFrame() : m_down_dlg(*this) {}
+
 BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) {
 	if (CFrameWindowImpl<CMainFrame>::PreTranslateMessage(pMsg))
 		return TRUE;
@@ -52,7 +51,6 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 }
 
 LRESULT CMainFrame::OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
-	CDownloadDialog m_downdlg;
-	m_downdlg.DoModal();
+	m_down_dlg.DoModal();
 	return 0;
 }

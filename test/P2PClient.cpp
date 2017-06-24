@@ -5,11 +5,17 @@
 #include "MainFrm.h"
 #include "P2PClient.h"
 
-
-P2PClient::P2PClient(CMainFrame& _main)
+P2PClient::P2PClient(CMainFrame &_main)
 	: m_main(_main),
 	m_idx(m_main.m_downlist.GetItemCount()) {
-	m_main.m_downlist.SetItemText(m_idx, 4, _T("0%"));
+	m_main.m_down_dlg.m_ip.GetAddress((LPDWORD)&m_tracker.sin_addr);
+	m_tracker.sin_port = m_main.m_down_dlg.m_port.GetWindowTextA(m_port_str, sizeof(m_port_str));
+
+	m_main.m_downlist.AddItem(m_idx, 0, "");
+	m_main.m_downlist.AddItem(m_idx, 1, "");
+	m_main.m_downlist.AddItem(m_idx, 2, inet_ntoa(m_tracker.sin_addr));
+	m_main.m_downlist.AddItem(m_idx, 3, m_port_str);
+	m_main.m_downlist.AddItem(m_idx, 4, _T("0%"));
 }
 
 bool P2PClient::RequestClientList() {
@@ -36,12 +42,8 @@ bool P2PClient::RequestFileProps() {
 		if (m_sock.RecvFrom(&m_fileprops, sizeof(m_fileprops), nullptr)) {
 			TCHAR buff[11];
 			_ltoa(m_fileprops.m_size, buff, 10);
-			//itoa(m_tracker.sin_port, m_port_str, 10); //not here!
-			//inet_pton(4, m_ip_str, &m_tracker.sin_addr); //not here!!
 			m_main.m_downlist.SetItemText(m_idx, 0, m_fileprops.m_name);
 			m_main.m_downlist.SetItemText(m_idx, 1, buff);
-			//m_main.m_downlist.SetItemText(m_idx, 2, m_ip_str); //not here!
-			//m_main.m_downlist.SetItemText(m_idx, 3, m_port_str); //not here!
 			return true;
 		}
 	}
