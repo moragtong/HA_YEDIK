@@ -9,13 +9,18 @@
 #include "P2PClient.h"
 #include "DownloadDialog.h"
 
-CDownloadDialog::CDownloadDialog(CMainFrame &parent)
+CDownloadDialog::CDownloadDialog(CMain &parent)
 	: m_parent(parent) {
-	m_port.SetLimitText(5);
 }
+
 LRESULT CDownloadDialog::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
 	CenterWindow(m_parent);
-	
+	m_ip = GetDlgItem(IDC_IPADDRESS);
+	m_port = GetDlgItem(IDC_EDIT);
+	m_spin = GetDlgItem(IDC_SPIN);
+	m_port.SetLimitText(5);
+	m_spin.SetRange32(2000, 65536);
+	m_spin.SetPos32(2000);
 	return TRUE;
 }
 
@@ -25,8 +30,7 @@ LRESULT CDownloadDialog::OnCancelCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWnd
 }
 
 LRESULT CDownloadDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
-	DoDataExchange(DDX_SAVE);
-	P2PClient(this->m_parent);
+	P2PClient(this->m_parent).StartDownload();
 	EndDialog(wID);
 	return 0;
 }

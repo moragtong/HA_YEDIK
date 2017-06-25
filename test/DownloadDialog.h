@@ -1,13 +1,12 @@
 #pragma once
-struct CMainFrame;
+struct CMain;
 struct CDownloadDialog final :
-	CDialogImpl<CDownloadDialog>, 
-	CWinDataExchange<CDownloadDialog> {
-
+	CDialogImpl<CDownloadDialog> {
 	enum { IDD = IDD_FORMVIEW };
 
-	CMainFrame &m_parent;
+	CMain &m_parent;
 	CIPAddressCtrl m_ip;
+	CUpDownCtrl m_spin;
 	CEdit m_port;
 
 	BEGIN_MSG_MAP(CDownloadDialog)
@@ -16,12 +15,7 @@ struct CDownloadDialog final :
 		COMMAND_ID_HANDLER(IDOK, OnOKCmd)
 	END_MSG_MAP()
 
-	BEGIN_DDX_MAP(CDownloadDialog)
-		DDX_CONTROL_HANDLE(IDC_IPADDRESS, m_ip)
-		DDX_CONTROL_HANDLE(IDC_EDIT, m_port)
-	END_DDX_MAP()
-
-	CDownloadDialog(CMainFrame &);
+	CDownloadDialog(CMain &);
 	// Handler prototypes (uncomment arguments if needed):
 	//	LRESULT MessageHandler(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 	//	LRESULT CommandHandler(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/)

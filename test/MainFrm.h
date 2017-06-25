@@ -1,12 +1,12 @@
-// MainFrm.h : interface of the CMainFrame class
+// MainFrm.h : interface of the CMain class
 //
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
 #include "DownloadDialog.h"
-struct CMainFrame final :
-	CFrameWindowImpl<CMainFrame>,
-	CUpdateUI<CMainFrame>,
+struct CMain final :
+	CFrameWindowImpl<CMain>,
+	CUpdateUI<CMain>,
 	CMessageFilter, CIdleHandler {
 
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
@@ -14,21 +14,21 @@ struct CMainFrame final :
 	CDownloadList m_downlist;
 	CDownloadDialog m_down_dlg;
 	//etl::vector<std::thread, 32> m_down_thread_store;
-	CMainFrame();
+	CMain();
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 	BOOL OnIdle();
 
-	BEGIN_UPDATE_UI_MAP(CMainFrame)
+	BEGIN_UPDATE_UI_MAP(CMain)
 		UPDATE_ELEMENT(ID_VIEW_TOOLBAR, UPDUI_MENUPOPUP)
 	END_UPDATE_UI_MAP()
 
-	BEGIN_MSG_MAP(CMainFrame)
+	BEGIN_MSG_MAP(CMain)
 		MESSAGE_HANDLER(WM_CREATE, OnCreate)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
 		COMMAND_ID_HANDLER(ID_DOWNLOAD_BUTTON, OnDownload)
-		CHAIN_MSG_MAP(CUpdateUI<CMainFrame>)
-		CHAIN_MSG_MAP(CFrameWindowImpl<CMainFrame>)
+		CHAIN_MSG_MAP(CUpdateUI<CMain>)
+		CHAIN_MSG_MAP(CFrameWindowImpl<CMain>)
 	END_MSG_MAP()
 
 	// Handler prototypes (uncomment arguments if needed):

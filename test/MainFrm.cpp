@@ -1,4 +1,4 @@
-﻿// MainFrm.cpp : implmentation of the CMainFrame class
+﻿// MainFrm.cpp : implmentation of the CMain class
 //
 /////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
@@ -7,21 +7,23 @@
 #include "DownloadList.h"
 #include "MainFrm.h"
 
-CMainFrame::CMainFrame() : m_down_dlg(*this) {}
+CMain::CMain()
+	: m_down_dlg(*this) {
+}
 
-BOOL CMainFrame::PreTranslateMessage(MSG* pMsg) {
-	if (CFrameWindowImpl<CMainFrame>::PreTranslateMessage(pMsg))
+BOOL CMain::PreTranslateMessage(MSG* pMsg) {
+	if (CFrameWindowImpl<CMain>::PreTranslateMessage(pMsg))
 		return TRUE;
 
 	return m_downlist.PreTranslateMessage(pMsg);
 }
 
-BOOL CMainFrame::OnIdle() {
+BOOL CMain::OnIdle() {
 	UIUpdateToolBar();
 	return FALSE;
 }
 
-LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
+LRESULT CMain::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
 	CreateSimpleToolBar(IDR_TOOLBAR1);
 	m_hWndClient = m_downlist.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | LVS_REPORT | LVS_SHOWSELALWAYS, WS_EX_CLIENTEDGE);
 	m_downlist.AddColumn(_T("name"), 0);
@@ -39,7 +41,7 @@ LRESULT CMainFrame::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/
 	return 0;
 }
 
-LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) {
+LRESULT CMain::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& bHandled) {
 	// unregister message filtering and idle updates
 	CMessageLoop* pLoop = _Module.GetMessageLoop();
 	ATLASSERT(pLoop != NULL);
@@ -50,7 +52,7 @@ LRESULT CMainFrame::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*
 	return 1;
 }
 
-LRESULT CMainFrame::OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+LRESULT CMain::OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 	m_down_dlg.DoModal();
 	return 0;
 }

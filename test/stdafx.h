@@ -6,8 +6,8 @@
 #pragma once
 
 // Change these values to use different versions
-#define WINVER 0x0A00  
-#define _WIN32_WINNT 0x0A00  
+#define WINVER 0x0500  
+#define _WIN32_WINNT 0x0500  
 #define _WIN32_IE	0x0501
 #define _RICHEDIT_VER	0x0500
 
@@ -21,7 +21,6 @@ extern CAppModule _Module;
 #include <atlframe.h>
 #include <atlctrls.h>
 #include <atldlgs.h>
-#include <atlddx.h>
 #include <fstream>
 #include <vector.h>
 #include <thread>

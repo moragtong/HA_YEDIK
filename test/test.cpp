@@ -27,7 +27,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR lp
 
 	CMessageLoop theLoop;
 	_Module.AddMessageLoop(&theLoop);
-	CMainFrame wndMain;
+	CMain wndMain;
 	int nRet;
 	if (wndMain.CreateEx() == NULL) {
 		ATLTRACE(_T("Main window creation failed!\n"));
