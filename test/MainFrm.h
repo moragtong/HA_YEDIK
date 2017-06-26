@@ -13,7 +13,9 @@ struct CMain final :
 	
 	CDownloadList m_downlist;
 	CDownloadDialog m_down_dlg;
-	//etl::vector<std::thread, 32> m_down_thread_store;
+#ifdef _READY
+	etl::vector<std::thread, 32> m_down_thread_store;
+#endif
 	CMain();
 
 	BOOL PreTranslateMessage(MSG* pMsg);

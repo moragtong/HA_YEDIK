@@ -8,11 +8,15 @@ struct CDownloadDialog final :
 	CIPAddressCtrl m_ip;
 	CUpDownCtrl m_spin;
 	CEdit m_port;
+	CEdit m_path;
+	CButton m_ok;
+	CButton m_browse;
 
 	BEGIN_MSG_MAP(CDownloadDialog)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCancelCmd)
 		COMMAND_ID_HANDLER(IDOK, OnOKCmd)
+		COMMAND_ID_HANDLER(IDC_BROWSE, OnBrowseCmd)
 	END_MSG_MAP()
 
 	CDownloadDialog(CMain &);
@@ -23,5 +27,6 @@ struct CDownloadDialog final :
 	LRESULT OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnCancelCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnBrowseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };
 

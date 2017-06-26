@@ -7,16 +7,16 @@ class P2PClient {
 	};
 
 	enum class RecvResult : char {
+		SUCCESS,
 		ERROR_NO_CLIENTS,
 		ERROR_FILEIO,
-		SUCCESS
 	};
 
 	struct TrkCom {
 		enum TrkComEnum : char {
 			ADD,
 			REMOVE,
-			LIST
+			LIST,
 		};
 
 		TrkComEnum m_command;
@@ -26,7 +26,7 @@ class P2PClient {
 	struct ClnCom {
 		enum ClnComEnum : char {
 			FILEDATA,
-			PKT
+			PKT,
 		};
 
 		ClnComEnum m_command;
@@ -34,7 +34,7 @@ class P2PClient {
 	};
 	struct FileProps {
 		unsigned long m_size;
-		TCHAR m_name[MAX_PATH / 5];
+		TCHAR m_name[MAX_PATH];
 	};
 
 	union {

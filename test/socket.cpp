@@ -27,11 +27,11 @@ namespace Socket {
 	namespace detail {
 #ifdef _WIN32
 		SocketBase::_wsinit::_wsinit() {
-			WSADATA wsaData;
-			WSAStartup(MAKEWORD(2, 2), &wsaData);
+			::WSADATA wsaData;
+			::WSAStartup(MAKEWORD(2, 2), &wsaData);
 		}
 		SocketBase::_wsinit::~_wsinit() {
-			WSACleanup();
+			::WSACleanup();
 		}
 #endif
 		SocketBase::SocketBase() {

@@ -20,6 +20,11 @@ BOOL CMain::PreTranslateMessage(MSG* pMsg) {
 
 BOOL CMain::OnIdle() {
 	UIUpdateToolBar();
+	if (m_down_dlg.m_hWnd) {
+		m_down_dlg.m_ok.EnableWindow(m_down_dlg.m_path.GetWindowTextLength());
+		m_down_dlg.m_ok.SetButtonStyle(BS_DEFPUSHBUTTON);
+		m_down_dlg.m_browse.SetButtonStyle(BS_PUSHBUTTON);
+	}
 	return FALSE;
 }
 
@@ -53,6 +58,8 @@ LRESULT CMain::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BO
 }
 
 LRESULT CMain::OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
-	m_down_dlg.DoModal();
+	EnableWindow(false);
+	m_down_dlg.Create(*this);
+	m_down_dlg.ShowWindow(SW_SHOWNORMAL);
 	return 0;
 }
