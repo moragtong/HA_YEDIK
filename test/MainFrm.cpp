@@ -20,11 +20,6 @@ BOOL CMain::PreTranslateMessage(MSG* pMsg) {
 
 BOOL CMain::OnIdle() {
 	UIUpdateToolBar();
-	if (m_down_dlg.m_hWnd) {
-		m_down_dlg.m_ok.EnableWindow(m_down_dlg.m_path.GetWindowTextLength());
-		m_down_dlg.m_ok.SetButtonStyle(BS_DEFPUSHBUTTON);
-		m_down_dlg.m_browse.SetButtonStyle(BS_PUSHBUTTON);
-	}
 	return FALSE;
 }
 

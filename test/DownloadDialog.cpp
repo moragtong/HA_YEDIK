@@ -26,9 +26,16 @@ LRESULT CDownloadDialog::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /
 	m_spin.SetPos32(2000);
 	TCHAR buff[MAX_PATH];
 	GetEnvironmentVariable(_T("USERPROFILE"), buff, sizeof(buff));
+	StrCat(buff, _T("\\downloads"));
 	m_path.SetWindowText(buff);
-	m_path.AppendText(_T("\\downloads"));
 	return TRUE;
+}
+
+LRESULT CDownloadDialog::OnEditControlChange(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+	m_ok.EnableWindow(m_path.GetWindowTextLength() && !m_ip.IsBlank());
+	m_ok.SetButtonStyle(BS_DEFPUSHBUTTON);
+	m_browse.SetButtonStyle(BS_PUSHBUTTON);
+	return 0;
 }
 
 LRESULT CDownloadDialog::OnCancelCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {

@@ -42,11 +42,11 @@ class P2PClient {
 		TCHAR m_port_str[6];
 		TCHAR m_ip_str[16];
 	};
+	CMain &m_main;
 	FileProps m_fileprops;
 	etl::vector<::sockaddr_in, 32> m_clients;
 	::sockaddr_in m_tracker;
 	Socket::UDP m_sock;
-	CMain &m_main;
 	const unsigned int m_idx;
 
 public:

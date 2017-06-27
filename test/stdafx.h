@@ -23,7 +23,9 @@ extern CAppModule _Module;
 #include <atldlgs.h>
 #include <fstream>
 #include <vector.h>
+#ifdef READY
 #include <thread>
+#endif
 #include "socket.h"
 
 #if defined _M_IX86
