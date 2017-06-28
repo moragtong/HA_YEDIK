@@ -5,9 +5,9 @@
 #include "MainFrm.h"
 #include "P2PClient.h"
 
-P2PClient::P2PClient(CMain &_main)
-	: m_main(_main),
-	m_idx(m_main.m_downlist.GetItemCount()) {
+P2PClient::P2PClient(CDownloadList &_downlist)
+	: m_downlist(_downlist),
+	m_idx(m_downlist.GetItemCount()) {
 	m_tracker.sin_family = AF_INET;
 }
 
@@ -32,8 +32,8 @@ bool P2PClient::RequestFileProps() {
 		if (m_sock.RecvFrom(&m_fileprops, sizeof(m_fileprops), nullptr) > 0) {
 			TCHAR buff[11];
 			_ltot(m_fileprops.m_size, buff, 10);
-			m_main.m_downlist.SetItemText(m_idx, 0, m_fileprops.m_name);
-			m_main.m_downlist.SetItemText(m_idx, 1, buff);
+			m_downlist.SetItemText(m_idx, 0, m_fileprops.m_name);
+			m_downlist.SetItemText(m_idx, 1, buff);
 			return true;
 		}
 	}
@@ -66,7 +66,7 @@ P2PClient::RecvResult P2PClient::RecvFileContents() {
 				fd.write(buff, sizeof(buff));
 				_itot(temp.m_param * 100 / m_fileprops.m_size, (TCHAR*)buff, 10);
 				buff[strlen(buff)] = '%';
-				m_main.m_downlist.SetItemText(m_idx, 4, (TCHAR*)buff);
+				m_downlist.SetItemText(m_idx, 4, (TCHAR*)buff);
 			}
 			i = (i + 1) % m_clients.size();
 		} while (temp.m_param < m_fileprops.m_size);
@@ -94,30 +94,17 @@ void P2PClient::Seed() {
 	}
 }
 
-void P2PClient::StartDownload() {
-	m_main.m_down_dlg.m_ip.GetAddress((LPDWORD)&m_tracker.sin_addr);
-	m_tracker.sin_port = m_main.m_down_dlg.m_spin.GetPos();
+void P2PClient::StartDownload(DWORD addr, WORD port) {
+	m_tracker.sin_port = port;
+	m_tracker.sin_addr = (in_addr&)addr;
 
-	m_main.m_downlist.AddItem(m_idx, 0, nullptr);
-
-	m_main.m_downlist.AddItem(m_idx, 1, nullptr);
-
-	m_main.m_down_dlg.m_ip.GetWindowText(m_ip_str, sizeof(m_ip_str));
-	m_main.m_downlist.AddItem(m_idx, 2, m_ip_str);
-
-	m_main.m_down_dlg.m_port.GetWindowText(m_port_str, sizeof(m_port_str));
-	m_main.m_downlist.AddItem(m_idx, 3, m_port_str);
-
-	m_main.m_downlist.AddItem(m_idx, 4, _T("0%"));
-#ifdef _READY
 	m_sock.Create();
 	m_sock.SetTimeout(1);
 
-	if (RequestClientList())
+	if (RequestClientList()) //temp
 		if (RequestFileProps())
 			if (RecvFileContents() == RecvResult::SUCCESS)
 				Seed();
-#endif
 }
 
 void P2PClient::StartShare() {

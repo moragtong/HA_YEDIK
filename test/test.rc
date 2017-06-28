@@ -153,15 +153,17 @@ BEGIN
     LTEXT           "Download location:",IDC_STATIC,7,47,64,9
 END
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// AFX_DIALOG_LAYOUT
-//
-
-IDD_FORMVIEW AFX_DIALOG_LAYOUT
+IDD_FORMVIEW1 DIALOGEX 0, 0, 291, 67
+STYLE DS_SETFONT | DS_MODALFRAME | DS_SETFOREGROUND | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    0
+    CONTROL         "",IDC_IPADDRESS,"SysIPAddress32",WS_TABSTOP,85,7,80,14
+    EDITTEXT        IDC_PATH,85,26,145,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "Browse...",IDC_BROWSE,235,25,50,14
+    DEFPUSHBUTTON   "OK",IDOK,181,46,50,14,WS_DISABLED,0,HIDOK
+    PUSHBUTTON      "Cancel",IDCANCEL,235,46,50,14
+    LTEXT           "Tracker's IP:",-1,7,10,41,9
+    LTEXT           "Download location:",-1,7,27,64,9
 END
 
 
@@ -178,10 +180,34 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 285
         TOPMARGIN, 7
-        BOTTOMMARGIN, 77
+        BOTTOMMARGIN, 78
+    END
+
+    IDD_FORMVIEW1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 284
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 60
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_FORMVIEW AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_FORMVIEW1 AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
 
 
 /////////////////////////////////////////////////////////////////////////////

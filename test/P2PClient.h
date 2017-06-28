@@ -37,12 +37,9 @@ class P2PClient {
 		TCHAR m_name[MAX_PATH];
 	};
 
-	union {
-		TCHAR m_file_name_str[MAX_PATH];
-		TCHAR m_port_str[6];
-		TCHAR m_ip_str[16];
-	};
-	CMain &m_main;
+	CDownloadList &m_downlist;
+
+	TCHAR m_file_name_str[MAX_PATH];
 	FileProps m_fileprops;
 	etl::vector<::sockaddr_in, 32> m_clients;
 	::sockaddr_in m_tracker;
@@ -50,12 +47,12 @@ class P2PClient {
 	const unsigned int m_idx;
 
 public:
-	explicit P2PClient(CMain &);
+	explicit P2PClient(CDownloadList &);
 	bool RequestClientList();
 	bool RequestFileProps();
 	RecvResult RecvFileContents();
 	void Seed();
-	void StartDownload();
+	void StartDownload(DWORD addr, WORD port);
 	void StartShare();
 };
 

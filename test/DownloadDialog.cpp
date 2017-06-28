@@ -39,24 +39,41 @@ LRESULT CDownloadDialog::OnEditControlChange(WORD /*wNotifyCode*/, WORD wID, HWN
 }
 
 LRESULT CDownloadDialog::OnCancelCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
-	m_parent.EnableWindow();
-	DestroyWindow();
+	EndDialog(wID);
 	return 0;
 }
 
 LRESULT CDownloadDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
-	P2PClient(m_parent).StartDownload();
-	m_parent.EnableWindow();
-	DestroyWindow();
+	auto idx = m_parent.m_downlist.GetItemCount();
+	m_parent.m_downlist.AddItem(idx, 0, nullptr);
+
+	m_parent.m_downlist.AddItem(idx, 1, nullptr);
+	{
+		TCHAR m_ip_str[16];
+		m_ip.GetWindowText(m_ip_str, sizeof(m_ip_str));
+		m_parent.m_downlist.AddItem(idx, 2, m_ip_str);
+	}
+	{
+		TCHAR m_port_str[6];
+		m_port.GetWindowText(m_port_str, sizeof(m_port_str));
+		m_parent.m_downlist.AddItem(idx, 3, m_port_str);
+	}
+	m_parent.m_downlist.AddItem(idx, 4, _T("0%"));
+#ifdef _READY
+	DWORD addr;
+	m_ip.GetAddress((LPDWORD)&addr);
+	P2PClient(m_parent.m_downlist).StartDownload(addr, m_spin.GetPos());
+#endif
+	EndDialog(wID);
 	return 0;
 }
 
 LRESULT CDownloadDialog::OnBrowseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 	TCHAR buff[MAX_PATH];
 	m_path.GetWindowText(buff, sizeof(buff));
-	CFolderDialog m_folderdlg(*this, _T("Choose where the file is going to be downloaded to:"));
-	m_folderdlg.SetInitialFolder(buff);
-	if (m_folderdlg.DoModal() == IDOK)
-		m_path.SetWindowText(m_folderdlg.GetFolderPath());
+	CFolderDialog folderdlg(*this, _T("Choose where the file is going to be downloaded to:"));
+	folderdlg.SetInitialFolder(buff);
+	if (folderdlg.DoModal() == IDOK)
+		m_path.SetWindowText(folderdlg.GetFolderPath());
 	return 0;
 }

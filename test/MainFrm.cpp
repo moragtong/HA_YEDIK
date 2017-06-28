@@ -7,10 +7,6 @@
 #include "DownloadList.h"
 #include "MainFrm.h"
 
-CMain::CMain()
-	: m_down_dlg(*this) {
-}
-
 BOOL CMain::PreTranslateMessage(MSG* pMsg) {
 	if (CFrameWindowImpl<CMain>::PreTranslateMessage(pMsg))
 		return TRUE;
@@ -53,8 +49,6 @@ LRESULT CMain::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BO
 }
 
 LRESULT CMain::OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
-	EnableWindow(false);
-	m_down_dlg.Create(*this);
-	m_down_dlg.ShowWindow(SW_SHOWNORMAL);
+	CDownloadDialog(*this).DoModal(*this);
 	return 0;
 }

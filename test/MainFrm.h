@@ -12,11 +12,10 @@ struct CMain final :
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
 	
 	CDownloadList m_downlist;
-	CDownloadDialog m_down_dlg;
+
 #ifdef _READY
 	etl::vector<std::thread, 32> m_down_thread_store;
 #endif
-	CMain();
 
 	BOOL PreTranslateMessage(MSG* pMsg);
 	BOOL OnIdle();
