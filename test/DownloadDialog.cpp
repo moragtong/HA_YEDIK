@@ -26,7 +26,7 @@ LRESULT CDownloadDialog::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /
 	m_spin.SetPos32(2000);
 	TCHAR buff[MAX_PATH];
 	GetEnvironmentVariable(_T("USERPROFILE"), buff, sizeof(buff));
-	StrCat(buff, _T("\\downloads"));
+	StrCat(buff, _T("\\Downloads"));
 	m_path.SetWindowText(buff);
 	return TRUE;
 }

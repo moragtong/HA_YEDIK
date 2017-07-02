@@ -163,7 +163,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,181,46,50,14,WS_DISABLED,0,HIDOK
     PUSHBUTTON      "Cancel",IDCANCEL,235,46,50,14
     LTEXT           "Tracker's IP:",-1,7,10,41,9
-    LTEXT           "Download location:",-1,7,27,64,9
+    LTEXT           "File to share:",-1,7,27,64,9
 END
 
 
@@ -301,6 +301,11 @@ END
 STRINGTABLE
 BEGIN
     ATL_IDS_MRU_FILE        "Open this document"
+END
+
+STRINGTABLE
+BEGIN
+    ID_DOWNLOAD_BUTTON      "Download a file from multiple sources."
 END
 
 #endif    // English (United States) resources

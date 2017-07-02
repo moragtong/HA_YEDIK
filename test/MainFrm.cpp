@@ -6,7 +6,6 @@
 #include "DownloadDialog.h"
 #include "DownloadList.h"
 #include "MainFrm.h"
-
 BOOL CMain::PreTranslateMessage(MSG* pMsg) {
 	if (CFrameWindowImpl<CMain>::PreTranslateMessage(pMsg))
 		return TRUE;
