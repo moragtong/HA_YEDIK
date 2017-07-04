@@ -4,6 +4,8 @@
 #include "stdafx.h"
 
 #include "resource.h"
+#include "BasicDialog.h"
+#include "ShareDialog.h"
 #include "DownloadDialog.h"
 #include "DownloadList.h"
 #include "MainFrm.h"

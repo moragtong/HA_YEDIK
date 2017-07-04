@@ -21,16 +21,16 @@ namespace Socket::detail {
 		::SOCKET sock;
 		::sockaddr_in sock_info;
 		SocketBase();
-		void SetSOCK(::SOCKET Sock);
+		SocketBase(::SOCKET Sock);
 		int Bind(unsigned short int nPort);
 
 	public:
 		SocketBase(SocketBase &&) = default;
 		SocketBase& operator=(SocketBase &&) = default;
-		void CloseSocket();
+		void Close();
 		int SetNonBlockingMode(bool bBlockingMode);
 		int SetTimeout(unsigned long sec, unsigned long usec = 0);
-		bool IsValidSocket();
+		bool IsValid();
 		~SocketBase();
 
 		static int GetLastError();

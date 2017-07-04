@@ -3,7 +3,9 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
+#include "BasicDialog.h"
 #include "DownloadDialog.h"
+#include "ShareDialog.h"
 struct CMain final :
 	CFrameWindowImpl<CMain>,
 	CUpdateUI<CMain>,
@@ -28,6 +30,7 @@ struct CMain final :
 		MESSAGE_HANDLER(WM_CREATE, OnCreate)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
 		COMMAND_ID_HANDLER(ID_DOWNLOAD_BUTTON, OnDownload)
+		COMMAND_ID_HANDLER(ID_SHARE_BUTTON, OnShare)
 		CHAIN_MSG_MAP(CUpdateUI<CMain>)
 		CHAIN_MSG_MAP(CFrameWindowImpl<CMain>)
 	END_MSG_MAP()
@@ -40,4 +43,5 @@ struct CMain final :
 	LRESULT OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnShare(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };

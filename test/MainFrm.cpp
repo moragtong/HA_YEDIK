@@ -3,9 +3,12 @@
 /////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "resource.h"
+#include "BasicDialog.h"
+#include "ShareDialog.h"
 #include "DownloadDialog.h"
 #include "DownloadList.h"
 #include "MainFrm.h"
+
 BOOL CMain::PreTranslateMessage(MSG* pMsg) {
 	if (CFrameWindowImpl<CMain>::PreTranslateMessage(pMsg))
 		return TRUE;
@@ -49,5 +52,10 @@ LRESULT CMain::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BO
 
 LRESULT CMain::OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 	CDownloadDialog(*this).DoModal(*this);
+	return 0;
+}
+
+LRESULT CMain::OnShare(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+	CShareDialog(*this).DoModal(*this);
 	return 0;
 }

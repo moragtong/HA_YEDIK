@@ -52,7 +52,7 @@ public:
 	bool RequestFileProps();
 	RecvResult RecvFileContents();
 	void Seed();
-	void StartDownload(DWORD addr, WORD port);
-	void StartShare();
+	void StartDownload(const DWORD, const WORD);
+	void StartShare(unsigned long, const TCHAR[MAX_PATH], const TCHAR m_name_cut[MAX_PATH]);
 };
 

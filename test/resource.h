@@ -14,6 +14,7 @@
 #define IDC_BROWSE                      1021
 #define ID_DOWNLOAD_BUTTON              32786
 #define ID_ADD_BUTTON                   32790
+#define ID_SHARE_BUTTON                 32790
 
 // Next default values for new objects
 // 

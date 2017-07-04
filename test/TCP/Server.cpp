@@ -9,10 +9,6 @@ namespace Socket::TCP {
 	}
 
 	Client Server::Accept() {
-		Client pSockClient;
-		SOCKET sock_temp = ::accept(sock, nullptr, nullptr);
-		if (sock_temp != INVALID_SOCKET)
-			pSockClient.SetSOCK(sock_temp);
-		return pSockClient;
+		return ::accept(sock, nullptr, nullptr);
 	}
 }

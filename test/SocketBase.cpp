@@ -30,10 +30,9 @@ namespace Socket::detail {
 		::memset(&sock_info, 0, sizeof(sock_info));
 	}
 
-	void SocketBase::SetSOCK(SOCKET Sock) {
-		if (Sock > 0) {
+	SocketBase::SocketBase(SOCKET Sock) {
+		if (Sock > 0)
 			sock = Sock;
-		}
 	}
 
 	int SocketBase::Bind(unsigned short int nPort) {
@@ -43,7 +42,7 @@ namespace Socket::detail {
 		return ::bind(sock, (sockaddr*)&sock_info, sizeof(sock_info));
 	}
 
-	void SocketBase::CloseSocket() {
+	void SocketBase::Close() {
 		if (sock != INVALID_SOCKET) {
 #ifdef _WIN32
 			::closesocket(sock);
@@ -88,12 +87,12 @@ namespace Socket::detail {
 		return ::setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&tv, sizeof(tv));
 	}
 
-	bool SocketBase::IsValidSocket() {
+	bool SocketBase::IsValid() {
 		return INVALID_SOCKET != sock;
 	}
 
 	SocketBase::~SocketBase() {
-		CloseSocket();
+		Close();
 	}
 
 	int SocketBase::GetLastError() {

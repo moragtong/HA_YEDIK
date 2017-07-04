@@ -48,6 +48,12 @@
     <ClCompile Include="UDP.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ShareDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -83,6 +89,12 @@
     <ClInclude Include="UDP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ShareDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="test.rc">
@@ -99,7 +111,6 @@
     <Image Include="res\bitmap1.bmp">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\..\..\..\..\Pictures\blah.png" />
     <Image Include="..\..\..\..\..\Downloads\favicon.ico">
       <Filter>Resource Files</Filter>
     </Image>

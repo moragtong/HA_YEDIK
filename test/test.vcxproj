@@ -216,9 +216,11 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BasicDialog.cpp" />
     <ClCompile Include="DownloadDialog.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="P2PClient.cpp" />
+    <ClCompile Include="ShareDialog.cpp" />
     <ClCompile Include="UDP.cpp" />
     <ClCompile Include="SocketBase.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -244,10 +246,12 @@
     <ClCompile Include="DownloadList.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BasicDialog.h" />
     <ClInclude Include="DownloadDialog.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="P2PClient.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="ShareDialog.h" />
     <ClInclude Include="UDP.h" />
     <ClInclude Include="SocketBase.h" />
     <ClInclude Include="stdafx.h" />
@@ -261,7 +265,6 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\..\Downloads\favicon.ico" />
-    <Image Include="..\..\..\..\..\Pictures\blah.png" />
     <Image Include="res\bitmap1.bmp" />
     <Image Include="res\test.ico" />
     <Image Include="res\toolbar1.bmp" />

@@ -1,8 +1,11 @@
 #include "stdafx.h"
 #include "resource.h"
+#include <fstream>
 #include <vector.h>
 #include "DownloadList.h"
 #include "MainFrm.h"
+#include "SocketBase.h"
+#include "UDP.h"
 #include "P2PClient.h"
 
 P2PClient::P2PClient(CDownloadList &_downlist)
@@ -48,7 +51,10 @@ P2PClient::RecvResult P2PClient::RecvFileContents() {
 		relib.fill(2);
 		char i = 0;
 		do {
-			char buff[BUFFSIZE];
+			union {
+				char buff[BUFFSIZE];
+				TCHAR len_buff[5];
+			};
 			m_sock.SendTo(&temp, sizeof(temp), m_clients[i]);
 			if (m_sock.RecvFrom(buff, sizeof(buff), nullptr) < 0) {
 				if (relib[i])
@@ -64,9 +70,9 @@ P2PClient::RecvResult P2PClient::RecvFileContents() {
 				temp.m_param += BUFFSIZE;
 				relib[i] = 2;
 				fd.write(buff, sizeof(buff));
-				_itot(temp.m_param * 100 / m_fileprops.m_size, (TCHAR*)buff, 10);
-				buff[strlen(buff)] = '%';
-				m_downlist.SetItemText(m_idx, 4, (TCHAR*)buff);
+				_itot(temp.m_param * 100 / m_fileprops.m_size, len_buff, sizeof(len_buff) / sizeof(TCHAR));
+				StrCat(len_buff, _T("%"));
+				m_downlist.SetItemText(m_idx, 4, len_buff);
 			}
 			i = (i + 1) % m_clients.size();
 		} while (temp.m_param < m_fileprops.m_size);
@@ -94,7 +100,7 @@ void P2PClient::Seed() {
 	}
 }
 
-void P2PClient::StartDownload(DWORD addr, WORD port) {
+void P2PClient::StartDownload(const DWORD addr, const WORD port) {
 	m_tracker.sin_port = port;
 	m_tracker.sin_addr = (in_addr&)addr;
 
@@ -107,6 +113,9 @@ void P2PClient::StartDownload(DWORD addr, WORD port) {
 				Seed();
 }
 
-void P2PClient::StartShare() {
-
+void P2PClient::StartShare(const unsigned long m_size, const TCHAR m_name[MAX_PATH], const TCHAR m_name_cut[MAX_PATH]) {
+	m_fileprops.m_size = m_size;
+	StrCpyN(m_file_name_str, m_name, MAX_PATH);
+	StrCpyN(m_fileprops.m_name, m_name_cut, MAX_PATH);
+	Seed();
 }
