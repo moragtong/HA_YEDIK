@@ -1,16 +1,27 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "DownloadList.h"
-#include "BasicDialog.h"
-#include "MainFrm.h"
 #include <fstream>
-#include <vector.h>
-#include "SocketBase.h"
+#include <vector>
+#include <thread>
+#include "MainFrm.h"
 #include "UDP.h"
 #include "P2PClient.h"
 #include "ShareDialog.h"
 #include <experimental\filesystem>
 #include <string_view>
+
+
+CShareDialog::CShareDialog(CMain &parent)
+	: m_parent(parent) {
+}
+
+LRESULT CShareDialog::OnEditCtrlChange(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+	m_ok.EnableWindow(m_path.GetWindowTextLength() && !m_ip.IsBlank());
+	m_ok.SetButtonStyle(BS_DEFPUSHBUTTON);
+	m_browse.SetButtonStyle(BS_PUSHBUTTON);
+	return 0;
+}
 
 LRESULT CShareDialog::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
 	CenterWindow(m_parent);
@@ -55,7 +66,9 @@ LRESULT CShareDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, 
 	m_parent.m_downlist.AddItem(idx, 3, nullptr);
 	m_parent.m_downlist.AddItem(idx, 4, _T("100%"));
 #ifdef _READY
-	P2PClient(m_parent.m_downlist).StartShare(size, name_str, display.data());
+	m_parent.m_down_thread_store.emplace_back([&] {
+		P2PClient(m_parent.m_downlist).StartShare(size, name_str, display.data());
+	});
 #endif
 	EndDialog(wID);
 	return 0;

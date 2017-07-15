@@ -1,14 +1,24 @@
 #include "stdafx.h"
 #include "resource.h"
-#include "DownloadList.h"
-#include "BasicDialog.h"
-#include "MainFrm.h"
+#include <vector>
+#include <thread>
 #include <fstream>
-#include <vector.h>
-#include "SocketBase.h"
+#include "DownloadList.h"
+#include "MainFrm.h"
 #include "UDP.h"
 #include "P2PClient.h"
 #include "DownloadDialog.h"
+
+CDownloadDialog::CDownloadDialog(CMain &parent)
+	: m_parent(parent) {
+}
+
+LRESULT CDownloadDialog::OnEditCtrlChange(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
+	m_ok.EnableWindow(m_path.GetWindowTextLength() && !m_ip.IsBlank());
+	m_ok.SetButtonStyle(BS_DEFPUSHBUTTON);
+	m_browse.SetButtonStyle(BS_PUSHBUTTON);
+	return 0;
+}
 
 LRESULT CDownloadDialog::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
 	CenterWindow(m_parent);
@@ -53,7 +63,9 @@ LRESULT CDownloadDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
 	{
 		DWORD addr;
 		m_ip.GetAddress((LPDWORD)&addr);
-		P2PClient(m_parent.m_downlist).StartDownload(addr, m_spin.GetPos());
+		m_parent.m_down_thread_store.emplace_back([&] {
+			P2PClient(m_parent.m_downlist).StartDownload(addr, m_spin.GetPos());
+		});
 	}
 #endif
 	EndDialog(wID);

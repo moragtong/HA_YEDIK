@@ -3,7 +3,6 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "BasicDialog.h"
 #include "DownloadDialog.h"
 #include "ShareDialog.h"
 struct CMain final :
@@ -16,7 +15,7 @@ struct CMain final :
 	CDownloadList m_downlist;
 
 #ifdef _READY
-	etl::vector<std::thread, 32> m_down_thread_store;
+	::std::vector<::std::thread> m_down_thread_store;
 #endif
 
 	BOOL PreTranslateMessage(MSG* pMsg);
@@ -26,7 +25,7 @@ struct CMain final :
 		UPDATE_ELEMENT(ID_VIEW_TOOLBAR, UPDUI_MENUPOPUP)
 	END_UPDATE_UI_MAP()
 
-	BEGIN_MSG_MAP(CMain)
+	BEGIN_MSG_MAP(decltype(*this))
 		MESSAGE_HANDLER(WM_CREATE, OnCreate)
 		MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
 		COMMAND_ID_HANDLER(ID_DOWNLOAD_BUTTON, OnDownload)
@@ -44,4 +43,6 @@ struct CMain final :
 	LRESULT OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/);
 	LRESULT OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnShare(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+
+	~CMain();
 };

@@ -1,27 +1,46 @@
 #include "stdafx.h"
 #include "resource.h"
 #include <fstream>
-#include <vector.h>
+#include <vector>
+#include <thread>
 #include "DownloadList.h"
 #include "MainFrm.h"
-#include "SocketBase.h"
 #include "UDP.h"
 #include "P2PClient.h"
 
+bool operator==(const in_addr &first, const in_addr &second) {
+	return (unsigned long &)first == (unsigned long &)second;
+}
+
+bool operator!=(const in_addr &first, const in_addr &second) {
+	return !(first == second);
+}
+
+bool operator==(const sockaddr_in &first, const sockaddr_in &second) {
+	return first.sin_addr == second.sin_addr && first.sin_family == second.sin_family && first.sin_port == second.sin_port;
+}
+
+bool operator!=(const sockaddr_in &first, const sockaddr_in &second) {
+	return !(first == second);
+}
+
 P2PClient::P2PClient(CDownloadList &_downlist)
 	: m_downlist(_downlist),
-	m_idx(m_downlist.GetItemCount()) {
+	m_idx(m_downlist.GetItemCount()),
+	m_clients(32) {
 	m_tracker.sin_family = AF_INET;
 }
 
 bool P2PClient::RequestClientList() {
-	m_clients.resize(m_clients.capacity());
-	int size;
 	char count = 4;
+	int size;
 	do {
 		TrkCom temp{ TrkCom::LIST };
 		m_sock.SendTo(&temp, sizeof(temp), m_tracker);
-		size = m_sock.RecvFrom(m_clients.data(), m_clients.capacity() * sizeof(sockaddr_in), nullptr);
+		sockaddr_in secure_tracker;
+		std::tie(size, secure_tracker) = m_sock.RecvFrom(m_clients.data(), m_clients.size() * sizeof(sockaddr_in));
+		if (secure_tracker != m_tracker)
+			return false;
 		--count;
 	} while (size < 0 && count);
 	m_clients.resize(size > 0 ? size / sizeof(sockaddr_in) : 0);
@@ -32,7 +51,10 @@ bool P2PClient::RequestFileProps() {
 	ClnCom temp{ ClnCom::FILEDATA };
 	for (const auto &client : m_clients) {
 		m_sock.SendTo(&temp, sizeof(temp), client);
-		if (m_sock.RecvFrom(&m_fileprops, sizeof(m_fileprops), nullptr) > 0) {
+		auto [size, secure_client] = m_sock.RecvFrom(&m_fileprops, sizeof(m_fileprops));
+		if (client != secure_client)
+			return false;
+		if (size > 0) {
 			TCHAR buff[11];
 			_ltot(m_fileprops.m_size, buff, 10);
 			m_downlist.SetItemText(m_idx, 0, m_fileprops.m_name);
@@ -47,8 +69,7 @@ P2PClient::RecvResult P2PClient::RecvFileContents() {
 	std::ofstream fd(m_file_name_str);
 	if (fd.is_open()) {
 		ClnCom temp{ ClnCom::PKT };
-		etl::array<char, CLN_NUM> relib;
-		relib.fill(2);
+		::std::vector<char> relib(m_clients.size(), 2);
 		char i = 0;
 		do {
 			union {
@@ -56,17 +77,18 @@ P2PClient::RecvResult P2PClient::RecvFileContents() {
 				TCHAR len_buff[5];
 			};
 			m_sock.SendTo(&temp, sizeof(temp), m_clients[i]);
-			if (m_sock.RecvFrom(buff, sizeof(buff), nullptr) < 0) {
+			auto [size, secure_client] = m_sock.RecvFrom(buff, sizeof(buff));
+			if (size < 0)
 				if (relib[i])
 					relib[i]--;
 				else {
-					m_clients.erase(m_clients.data() + i);
+					m_clients.erase(m_clients.cbegin() + i);
 					if (m_clients.empty())
 						return RecvResult::ERROR_NO_CLIENTS;
-					relib.erase_at(i);
+					relib.erase(relib.cbegin() + i);
 					continue;
 				}
-			} else {
+			else if (secure_client == m_clients[i]) {
 				temp.m_param += BUFFSIZE;
 				relib[i] = 2;
 				fd.write(buff, sizeof(buff));
@@ -88,15 +110,16 @@ void P2PClient::Seed() {
 	auto file_props_size = sizeof(m_fileprops.m_size) + AtlStrLen(m_fileprops.m_name) + 1;
 	for (;;) {
 		ClnCom temp;
-		sockaddr_in client;
-		m_sock.RecvFrom(&temp, sizeof(temp), &client);
-		if (temp.m_command == ClnCom::PKT) {
-			char buff[BUFFSIZE];
-			fd.seekg(temp.m_param);
-			m_sock.SendTo(buff, fd.readsome(buff, sizeof(buff)), client);
-			fd.close();
-		} else
-			m_sock.SendTo(&m_fileprops, file_props_size, client);
+		auto [size, client] = m_sock.RecvFrom(&temp, sizeof(temp));
+		if (size == sizeof(temp))
+			if (temp.m_command == ClnCom::PKT) {
+				char buff[BUFFSIZE];
+				fd.seekg(temp.m_param);
+				m_sock.SendTo(buff, fd.readsome(buff, sizeof(buff)), client);
+				fd.close();
+			}
+			else if (temp.m_command == ClnCom::FILEDATA)
+				m_sock.SendTo(&m_fileprops, file_props_size, client);
 	}
 }
 
@@ -111,6 +134,7 @@ void P2PClient::StartDownload(const DWORD addr, const WORD port) {
 		if (RequestFileProps())
 			if (RecvFileContents() == RecvResult::SUCCESS)
 				Seed();
+	OutputDebugString(_T("terminated!!!!!!!!"));
 }
 
 void P2PClient::StartShare(const unsigned long m_size, const TCHAR m_name[MAX_PATH], const TCHAR m_name_cut[MAX_PATH]) {

@@ -54,6 +54,7 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
+    <Import Project="..\..\Socket\Socket\Socket.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -70,19 +71,19 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\etl\src;C:\Users\miket\Downloads\WTL\Include;$(IncludePath)</IncludePath>
+    <IncludePath>;C:\Users\miket\Downloads\WTL\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>..\etl\src;C:\Users\miket\Downloads\WTL\Include;$(IncludePath)</IncludePath>
+    <IncludePath>;C:\Users\miket\Downloads\WTL\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\etl\src;C:\Users\miket\Downloads\WTL\Include;$(IncludePath)</IncludePath>
+    <IncludePath>;C:\Users\miket\Downloads\WTL\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>..\etl\src;C:\Users\miket\Downloads\WTL\Include;$(IncludePath)</IncludePath>
+    <IncludePath>;C:\Users\miket\Downloads\WTL\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -216,49 +217,27 @@
     </Midl>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="BasicDialog.cpp" />
     <ClCompile Include="DownloadDialog.cpp" />
     <ClCompile Include="MainFrm.cpp" />
     <ClCompile Include="P2PClient.cpp" />
     <ClCompile Include="ShareDialog.cpp" />
-    <ClCompile Include="UDP.cpp" />
-    <ClCompile Include="SocketBase.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="TCPBase.cpp" />
-    <ClCompile Include="TCP\Client.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\stdafx.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="TCP\Server.cpp">
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\stdafx.h</PrecompiledHeaderFile>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">..\stdafx.h</PrecompiledHeaderFile>
-    </ClCompile>
     <ClCompile Include="test.cpp" />
     <ClCompile Include="DownloadList.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="BasicDialog.h" />
     <ClInclude Include="DownloadDialog.h" />
     <ClInclude Include="MainFrm.h" />
     <ClInclude Include="P2PClient.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ShareDialog.h" />
-    <ClInclude Include="UDP.h" />
-    <ClInclude Include="SocketBase.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="DownloadList.h" />
-    <ClInclude Include="TCPBase.h" />
-    <ClInclude Include="TCP\Client.h" />
-    <ClInclude Include="TCP\Server.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="test.rc" />

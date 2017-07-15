@@ -1,15 +1,23 @@
 #pragma once
 struct CMain;
-struct CShareDialog final : CDialogImpl<CShareDialog>, BasicDialog {
+struct CShareDialog final : CDialogImpl<CShareDialog> {
 	enum { IDD = IDD_FORMVIEW1 };
 
-	using BasicDialog::BasicDialog;
+	CMain &m_parent;
+	CIPAddressCtrl m_ip;
+	CEdit m_path;
+	CButton m_ok;
+	CButton m_browse;
+
+	CShareDialog(CMain &parent);
+
 	BEGIN_MSG_MAP(decltype(*this))
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
 		COMMAND_ID_HANDLER(IDOK, OnOKCmd)
 		COMMAND_ID_HANDLER(IDCANCEL, OnCancelCmd)
 		COMMAND_ID_HANDLER(IDC_BROWSE, OnBrowseCmd)
-		CHAIN_MSG_MAP(BasicDialog)
+		COMMAND_HANDLER(IDC_PATH, EN_CHANGE, OnEditCtrlChange)
+		COMMAND_HANDLER(IDC_IPADDRESS, EN_CHANGE, OnEditCtrlChange)
 	END_MSG_MAP()
 
 	// Handler prototypes (uncomment arguments if needed):
@@ -20,5 +28,6 @@ struct CShareDialog final : CDialogImpl<CShareDialog>, BasicDialog {
 	LRESULT OnCancelCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnBrowseCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
+	LRESULT OnEditCtrlChange(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 };
 

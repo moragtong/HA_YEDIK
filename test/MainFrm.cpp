@@ -3,7 +3,8 @@
 /////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "resource.h"
-#include "BasicDialog.h"
+#include <vector>
+#include <thread>
 #include "ShareDialog.h"
 #include "DownloadDialog.h"
 #include "DownloadList.h"
@@ -58,4 +59,9 @@ LRESULT CMain::OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, 
 LRESULT CMain::OnShare(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 	CShareDialog(*this).DoModal(*this);
 	return 0;
+}
+
+CMain::~CMain() {
+	for (auto &thread : m_down_thread_store)
+		thread.join();
 }

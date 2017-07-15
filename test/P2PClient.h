@@ -1,19 +1,21 @@
 #pragma once
+bool operator==(const in_addr &, const in_addr &);
+bool operator!=(const in_addr &, const in_addr &);
+bool operator==(const sockaddr_in &, const sockaddr_in &);
+bool operator!=(const sockaddr_in &, const sockaddr_in &);
 class P2PClient {
-	enum {
-		CLN_NUM = 32,
-		BUFFSIZE = 1492,
-		TIMEOUT = 1500
+	enum : unsigned int {
+		BUFFSIZE = 1492
 	};
 
-	enum class RecvResult : char {
+	enum class RecvResult {
 		SUCCESS,
 		ERROR_NO_CLIENTS,
 		ERROR_FILEIO,
 	};
 
 	struct TrkCom {
-		enum TrkComEnum : char {
+		enum TrkComEnum : unsigned char {
 			ADD,
 			REMOVE,
 			LIST,
@@ -24,7 +26,7 @@ class P2PClient {
 	};
 
 	struct ClnCom {
-		enum ClnComEnum : char {
+		enum ClnComEnum {
 			FILEDATA,
 			PKT,
 		};
@@ -32,6 +34,7 @@ class P2PClient {
 		ClnComEnum m_command;
 		unsigned long m_param = 0;
 	};
+
 	struct FileProps {
 		unsigned long m_size;
 		TCHAR m_name[MAX_PATH];
@@ -41,7 +44,7 @@ class P2PClient {
 
 	TCHAR m_file_name_str[MAX_PATH];
 	FileProps m_fileprops;
-	etl::vector<::sockaddr_in, 32> m_clients;
+	::std::vector<::sockaddr_in> m_clients;
 	::sockaddr_in m_tracker;
 	Socket::UDP m_sock;
 	const unsigned int m_idx;
