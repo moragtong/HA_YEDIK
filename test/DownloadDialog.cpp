@@ -62,9 +62,10 @@ LRESULT CDownloadDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
 #ifdef _READY
 	{
 		DWORD addr;
-		m_ip.GetAddress((LPDWORD)&addr);
-		m_parent.m_down_thread_store.emplace_back([&] {
-			P2PClient(m_parent.m_downlist).StartDownload(addr, m_spin.GetPos());
+		m_ip.GetAddress(&addr);
+		auto pass = m_spin.GetPos();
+		m_parent.m_down_thread_store.emplace_back([=] {
+			P2PClient(m_parent.m_downlist).StartDownload(addr, pass);
 		});
 	}
 #endif

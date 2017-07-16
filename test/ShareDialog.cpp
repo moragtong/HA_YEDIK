@@ -39,7 +39,7 @@ LRESULT CShareDialog::OnCancelCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl
 
 LRESULT CShareDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 	auto idx = m_parent.m_downlist.GetItemCount();
-	TCHAR name_str[MAX_PATH];
+	auto name_str = new TCHAR[MAX_PATH];
 	m_path.GetWindowText(name_str, MAX_PATH);
 	std::basic_string_view<TCHAR> name_str_v = name_str;
 	auto display = name_str_v.substr(name_str_v.find_last_of('\\') + 1);
@@ -66,9 +66,14 @@ LRESULT CShareDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, 
 	m_parent.m_downlist.AddItem(idx, 3, nullptr);
 	m_parent.m_downlist.AddItem(idx, 4, _T("100%"));
 #ifdef _READY
-	m_parent.m_down_thread_store.emplace_back([&] {
-		P2PClient(m_parent.m_downlist).StartShare(size, name_str, display.data());
+	DWORD addr;
+	m_ip.GetAddress(&addr);
+	auto pass = display.data();
+	m_parent.m_down_thread_store.emplace_back([=] {
+		P2PClient(m_parent.m_downlist).StartShare(addr, size, name_str, pass);
 	});
+#else
+	delete []namestr;
 #endif
 	EndDialog(wID);
 	return 0;

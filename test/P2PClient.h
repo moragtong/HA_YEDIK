@@ -3,7 +3,7 @@ bool operator==(const in_addr &, const in_addr &);
 bool operator!=(const in_addr &, const in_addr &);
 bool operator==(const sockaddr_in &, const sockaddr_in &);
 bool operator!=(const sockaddr_in &, const sockaddr_in &);
-class P2PClient {
+struct P2PClient {
 	enum : unsigned int {
 		BUFFSIZE = 1492
 	};
@@ -49,13 +49,12 @@ class P2PClient {
 	Socket::UDP m_sock;
 	const unsigned int m_idx;
 
-public:
 	explicit P2PClient(CDownloadList &);
 	bool RequestClientList();
 	bool RequestFileProps();
 	RecvResult RecvFileContents();
 	void Seed();
-	void StartDownload(const DWORD, const WORD);
-	void StartShare(unsigned long, const TCHAR[MAX_PATH], const TCHAR m_name_cut[MAX_PATH]);
+	void StartDownload(unsigned long, unsigned short);
+	void StartShare(unsigned long, unsigned long, const TCHAR[MAX_PATH], const TCHAR m_name_cut[MAX_PATH]);
 };
 
