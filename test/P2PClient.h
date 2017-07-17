@@ -4,9 +4,7 @@ bool operator!=(const in_addr &, const in_addr &);
 bool operator==(const sockaddr_in &, const sockaddr_in &);
 bool operator!=(const sockaddr_in &, const sockaddr_in &);
 struct P2PClient {
-	enum : unsigned int {
-		BUFFSIZE = 1492
-	};
+	static constexpr unsigned int BUFFSIZE = 1492;
 
 	enum class RecvResult {
 		SUCCESS,
@@ -54,7 +52,7 @@ struct P2PClient {
 	bool RequestFileProps();
 	RecvResult RecvFileContents();
 	void Seed();
-	void StartDownload(unsigned long, unsigned short);
+	void StartDownload(unsigned long, unsigned short, const TCHAR[MAX_PATH]);
 	void StartShare(unsigned long, unsigned long, const TCHAR[MAX_PATH], const TCHAR m_name_cut[MAX_PATH]);
 };
 

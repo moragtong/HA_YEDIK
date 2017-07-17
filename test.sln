@@ -5,12 +5,12 @@ VisualStudioVersion = 15.0.26430.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test", "test\test.vcxproj", "{6AE52E0E-C4AD-4BF5-9945-F8CBC4276EF8}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Socket", "..\Socket\Socket\Socket.vcxitems", "{462634EC-AB9E-47F0-BC0A-15414DB030DE}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Socket", "Socket\Socket\Socket.vcxitems", "{462634EC-AB9E-47F0-BC0A-15414DB030DE}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		..\Socket\Socket\Socket.vcxitems*{462634ec-ab9e-47f0-bc0a-15414db030de}*SharedItemsImports = 9
-		..\Socket\Socket\Socket.vcxitems*{6ae52e0e-c4ad-4bf5-9945-f8cbc4276ef8}*SharedItemsImports = 4
+		Socket\Socket\Socket.vcxitems*{462634ec-ab9e-47f0-bc0a-15414db030de}*SharedItemsImports = 9
+		Socket\Socket\Socket.vcxitems*{6ae52e0e-c4ad-4bf5-9945-f8cbc4276ef8}*SharedItemsImports = 4
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64

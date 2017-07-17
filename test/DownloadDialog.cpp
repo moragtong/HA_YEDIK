@@ -64,8 +64,10 @@ LRESULT CDownloadDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
 		DWORD addr;
 		m_ip.GetAddress(&addr);
 		auto pass = m_spin.GetPos();
+		auto path = new TCHAR[MAX_PATH];
+		m_path.GetWindowText(path, MAX_PATH);
 		m_parent.m_down_thread_store.emplace_back([=] {
-			P2PClient(m_parent.m_downlist).StartDownload(addr, pass);
+			P2PClient(m_parent.m_downlist).StartDownload(addr, pass, path);
 		});
 	}
 #endif
