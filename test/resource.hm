@@ -1,0 +1,4 @@
+// Microsoft Visual C++ generated Help ID include file.
+// Used by test.rc
+//
+#define HIDOK                           0x80650001    // IDD_FORMVIEW
