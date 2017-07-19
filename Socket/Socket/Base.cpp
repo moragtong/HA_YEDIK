@@ -2,11 +2,27 @@
 #pragma comment(lib, "Ws2_32.lib")
 #endif
 
-#include "Base.h"
+#include "Base.hpp"
+
+bool operator==(const in_addr &first, const in_addr &second) {
+	return (unsigned long &)first == (unsigned long &)second;
+}
+
+bool operator!=(const in_addr &first, const in_addr &second) {
+	return !(first == second);
+}
+
+bool operator==(const sockaddr_in &first, const sockaddr_in &second) {
+	return first.sin_addr == second.sin_addr && first.sin_family == second.sin_family && first.sin_port == second.sin_port;
+}
+
+bool operator!=(const sockaddr_in &first, const sockaddr_in &second) {
+	return !(first == second);
+}
 
 namespace Socket::detail {
 	Base::_wsinit::_wsinit() {
-		Base::WSInit();
+		Socket::WSInit();
 	}
 
 	Base::_wsinit::~_wsinit() {
@@ -17,14 +33,26 @@ namespace Socket::detail {
 		: m_sock(_sock) {
 	}
 
+	Base::Base(Base &&other) 
+		: m_sock(other.m_sock), m_sock_info(other.m_sock_info) {
+		other.m_sock = INVALID_SOCKET;
+	}
+
+	Base& Base::operator=(Base &&other) {
+		m_sock = other.m_sock;
+		m_sock_info = other.m_sock_info;
+		other.m_sock = INVALID_SOCKET;
+		return *this;
+	}
+
 	std::error_code Base::Bind(unsigned short port, ::in_addr addr) {
 		m_sock_info.sin_family = AF_INET;
 		m_sock_info.sin_port = htons(port);
 		(unsigned long &)m_sock_info.sin_addr = htonl((unsigned long &)addr);
-		return {
-			::bind(m_sock, (sockaddr*)&m_sock_info, sizeof(m_sock_info)),
-			std::system_category()
-		};
+		auto retbind = ::bind(m_sock, (sockaddr *)&m_sock_info, sizeof(m_sock_info));
+		int infolen = sizeof(m_sock_info);
+		getsockname(m_sock, (sockaddr *)&m_sock_info, &infolen);
+		return { retbind, std::system_category() };
 	}
 
 	const ::sockaddr_in& Base::GetInfo() const {
@@ -83,7 +111,8 @@ namespace Socket::detail {
 	}
 
 	Base::~Base() {
-		Close();
+		if (IsValid())
+			Close();
 	}
 
 	std::error_code Base::GetLastError() {
@@ -95,15 +124,4 @@ namespace Socket::detail {
 #endif
 			, std::system_category() };
 	}
-
-#ifdef _WIN32
-	void Base::WSInit() {
-		::WSADATA wsaData;
-		::WSAStartup(MAKEWORD(2, 2), &wsaData);
-	}
-
-	void Base::WSDeInit() {
-		::WSACleanup();
-	}
-#endif
 }

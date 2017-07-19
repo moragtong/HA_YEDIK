@@ -3,22 +3,15 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "DownloadDialog.h"
-#include "ShareDialog.h"
-struct CMain final :
-	CFrameWindowImpl<CMain>,
-	CUpdateUI<CMain>,
-	CMessageFilter, CIdleHandler {
+#include "DownloadDialog.hpp"
+#include "ShareDialog.hpp"
 
-	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
-	
+struct CMain final : CFrameWindowImpl<CMain>, CUpdateUI<CMain>, CMessageFilter, CIdleHandler {
 	CDownloadList m_downlist;
 
-#ifdef _READY
-	::std::vector<::std::thread> m_down_thread_store;
-#endif
+	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
 
-	BOOL PreTranslateMessage(MSG* pMsg);
+	BOOL PreTranslateMessage(MSG *pMsg);
 	BOOL OnIdle();
 
 	BEGIN_UPDATE_UI_MAP(CMain)
@@ -44,5 +37,8 @@ struct CMain final :
 	LRESULT OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnShare(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
-	~CMain();
+	::std::vector<::std::tuple<::std::thread, ::sockaddr_in>> m_store;
+
+	void StartNewDownload(unsigned long, unsigned short, ::std::array<TCHAR, MAX_PATH> &);
+	void StartNewShare(unsigned long, unsigned long, ::std::array<TCHAR, MAX_PATH> &);
 };
