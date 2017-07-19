@@ -2,10 +2,10 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
+#include "stdafx.hpp"
 #include "resource.h"
 
-#include "DownloadList.h"
+#include "DownloadList.hpp"
 
 BOOL CDownloadList::PreTranslateMessage(MSG* pMsg) {
 	pMsg;

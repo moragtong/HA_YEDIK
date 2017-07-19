@@ -1,14 +1,17 @@
 ﻿// MainFrm.cpp : implmentation of the CMain class
 //
 /////////////////////////////////////////////////////////////////////////////
-#include "stdafx.h"
+#include "stdafx.hpp"
 #include "resource.h"
 #include <vector>
 #include <thread>
-#include "ShareDialog.h"
-#include "DownloadDialog.h"
-#include "DownloadList.h"
-#include "MainFrm.h"
+#include <array>
+#include "UDP.hpp"
+#include "ShareDialog.hpp"
+#include "DownloadDialog.hpp"
+#include "DownloadList.hpp"
+#include "P2PClient.hpp"
+#include "MainFrm.hpp"
 
 BOOL CMain::PreTranslateMessage(MSG* pMsg) {
 	if (CFrameWindowImpl<CMain>::PreTranslateMessage(pMsg))
@@ -23,6 +26,7 @@ BOOL CMain::OnIdle() {
 }
 
 LRESULT CMain::OnCreate(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/) {
+	Socket::WSInit();
 	CreateSimpleToolBar(IDR_TOOLBAR1);
 	m_hWndClient = m_downlist.Create(m_hWnd, rcDefault, NULL, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | LVS_REPORT | LVS_SHOWSELALWAYS, WS_EX_CLIENTEDGE);
 	m_downlist.AddColumn(_T("name"), 0);
@@ -46,8 +50,16 @@ LRESULT CMain::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BO
 	ATLASSERT(pLoop != NULL);
 	pLoop->RemoveMessageFilter(this);
 	pLoop->RemoveIdleHandler(this);
-
 	bHandled = FALSE;
+
+	Socket::UDP central;
+	central.Create();
+	central.Bind(61586, { 127, 0, 0, 1 });
+	for (auto &&temp : m_store) {
+		ATLASSERT(central.SendTo(nullptr, 0, std::get<1>(temp)) >= 0);
+		std::get<0>(temp).join();
+	}
+	::WSACleanup();
 	return 1;
 }
 
@@ -61,7 +73,28 @@ LRESULT CMain::OnShare(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOO
 	return 0;
 }
 
-CMain::~CMain() {
-	for (auto &thread : m_down_thread_store)
-		thread.join();
+void CMain::StartNewDownload(const unsigned long addr, const unsigned short port, ::std::array<TCHAR, MAX_PATH> &path) {
+	Socket::UDP sock;
+	sock.Create();
+	sock.Bind();
+	m_store.emplace_back(
+		[=, sock(::std::move(sock))] {
+			P2PClient(m_downlist, (::Socket::UDP &&)::std::move(sock)).StartDownload(addr, port, (TCHAR *)path.data());
+		},
+		sock.GetInfo()
+	);
+	ATLASSERT(!sock.IsValid());
+}
+
+void CMain::StartNewShare(unsigned long addr, unsigned long size, ::std::array<TCHAR, MAX_PATH> &name) {
+	Socket::UDP sock;
+	sock.Create();
+	sock.Bind();
+	m_store.emplace_back(
+		[=, sock(::std::move(sock))] {
+			P2PClient(m_downlist, (::Socket::UDP &&)::std::move(sock)).StartShare(addr, size, (TCHAR *)name.data());
+		},
+		sock.GetInfo()
+	);
+	ATLASSERT(!sock.IsValid());
 }

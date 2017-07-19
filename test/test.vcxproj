@@ -22,6 +22,7 @@
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{6AE52E0E-C4AD-4BF5-9945-F8CBC4276EF8}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <ProjectName>P2PClient</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -96,6 +97,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_WINDOWS;STRICT;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <PrecompiledHeaderFile>stdafx.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -129,6 +131,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_WINDOWS;STRICT;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <PrecompiledHeaderFile>stdafx.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -162,6 +165,7 @@
       <EnableModules>true</EnableModules>
       <Optimization>Full</Optimization>
       <MinimalRebuild>true</MinimalRebuild>
+      <PrecompiledHeaderFile>stdafx.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -195,6 +199,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <Optimization>Full</Optimization>
       <MinimalRebuild>true</MinimalRebuild>
+      <PrecompiledHeaderFile>stdafx.hpp</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -227,17 +232,17 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="test.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="DownloadList.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DownloadDialog.h" />
-    <ClInclude Include="MainFrm.h" />
-    <ClInclude Include="P2PClient.h" />
+    <ClInclude Include="DownloadDialog.hpp" />
+    <ClInclude Include="MainFrm.hpp" />
+    <ClInclude Include="P2PClient.hpp" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="ShareDialog.h" />
-    <ClInclude Include="stdafx.h" />
-    <ClInclude Include="DownloadList.h" />
+    <ClInclude Include="ShareDialog.hpp" />
+    <ClInclude Include="stdafx.hpp" />
+    <ClInclude Include="DownloadList.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="test.rc" />

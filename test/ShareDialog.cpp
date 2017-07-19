@@ -1,16 +1,15 @@
-#include "stdafx.h"
+#include "stdafx.hpp"
 #include "resource.h"
-#include "DownloadList.h"
 #include <fstream>
 #include <vector>
 #include <thread>
-#include "MainFrm.h"
-#include "UDP.h"
-#include "P2PClient.h"
-#include "ShareDialog.h"
+#include <array>
 #include <experimental\filesystem>
-#include <string_view>
-
+#include "DownloadList.hpp"
+#include "UDP.hpp"
+#include "MainFrm.hpp"
+#include "P2PClient.hpp"
+#include "ShareDialog.hpp"
 
 CShareDialog::CShareDialog(CMain &parent)
 	: m_parent(parent) {
@@ -39,23 +38,21 @@ LRESULT CShareDialog::OnCancelCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl
 
 LRESULT CShareDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/) {
 	auto idx = m_parent.m_downlist.GetItemCount();
-	auto name_str = new TCHAR[MAX_PATH];
-	m_path.GetWindowText(name_str, MAX_PATH);
-	std::basic_string_view<TCHAR> name_str_v = name_str;
-	auto display = name_str_v.substr(name_str_v.find_last_of('\\') + 1);
+	std::array<TCHAR, MAX_PATH> name_str;
+	m_path.GetWindowText(name_str.data(), MAX_PATH);
 	long size;
 	{
 		TCHAR file_size_str[11];
 		{
 			std::error_code eret;
-			size = std::experimental::filesystem::file_size(name_str, eret);
+			size = std::experimental::filesystem::file_size(name_str.data(), eret);
 			if (eret) {
 				MessageBox(_T("The file does not exist. Please enter the file's name again."), nullptr, MB_OK | MB_ICONWARNING | MB_APPLMODAL);
 				return 1;
 			}
 			_ltot(size, file_size_str, 10);
 		}
-		m_parent.m_downlist.AddItem(idx, 0, display.data());
+		m_parent.m_downlist.AddItem(idx, 0, _tcsrchr(name_str.data(), '\\') + 1);
 		m_parent.m_downlist.AddItem(idx, 1, file_size_str);
 	}
 	{
@@ -65,16 +62,9 @@ LRESULT CShareDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, 
 	}
 	m_parent.m_downlist.AddItem(idx, 3, nullptr);
 	m_parent.m_downlist.AddItem(idx, 4, _T("100%"));
-#ifdef _READY
 	DWORD addr;
 	m_ip.GetAddress(&addr);
-	auto pass = display.data();
-	m_parent.m_down_thread_store.emplace_back([=] {
-		P2PClient(m_parent.m_downlist).StartShare(addr, size, name_str, pass);
-	});
-#else
-	delete []namestr;
-#endif
+	m_parent.StartNewShare(addr, size, name_str);
 	EndDialog(wID);
 	return 0;
 }

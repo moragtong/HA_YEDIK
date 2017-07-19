@@ -14,14 +14,18 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)Base.h" />
-    <ClInclude Include="$(MSBuildThisFileDirectory)UDP.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)Base.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)UDP.hpp" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)WinSock.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)Base.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="$(MSBuildThisFileDirectory)UDP.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)WinSock.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>

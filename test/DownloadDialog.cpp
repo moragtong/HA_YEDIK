@@ -1,13 +1,14 @@
-#include "stdafx.h"
+#include "stdafx.hpp"
 #include "resource.h"
 #include <vector>
 #include <thread>
 #include <fstream>
-#include "DownloadList.h"
-#include "MainFrm.h"
-#include "UDP.h"
-#include "P2PClient.h"
-#include "DownloadDialog.h"
+#include <array>
+#include "UDP.hpp"
+#include "DownloadList.hpp"
+#include "P2PClient.hpp"
+#include "MainFrm.hpp"
+#include "DownloadDialog.hpp"
 
 CDownloadDialog::CDownloadDialog(CMain &parent)
 	: m_parent(parent) {
@@ -32,8 +33,8 @@ LRESULT CDownloadDialog::OnInitDialog(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /
 	m_spin.SetRange32(2000, 65536);
 	m_spin.SetPos32(2000);
 	TCHAR buff[MAX_PATH];
-	GetEnvironmentVariable(_T("USERPROFILE"), buff, sizeof(buff));
-	StrCat(buff, _T("\\Downloads"));
+	::GetEnvironmentVariable(_T("USERPROFILE"), buff, sizeof(buff));
+	::_tcscat(buff, _T("\\Downloads"));
 	m_path.SetWindowText(buff);
 	return TRUE;
 }
@@ -59,18 +60,14 @@ LRESULT CDownloadDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
 		m_parent.m_downlist.AddItem(idx, 3, m_port_str);
 	}
 	m_parent.m_downlist.AddItem(idx, 4, _T("0%"));
-#ifdef _READY
 	{
 		DWORD addr;
 		m_ip.GetAddress(&addr);
 		auto pass = m_spin.GetPos();
-		auto path = new TCHAR[MAX_PATH];
-		m_path.GetWindowText(path, MAX_PATH);
-		m_parent.m_down_thread_store.emplace_back([=] {
-			P2PClient(m_parent.m_downlist).StartDownload(addr, pass, path);
-		});
+		std::array<TCHAR, MAX_PATH> path;
+		m_path.GetWindowText(path.data(), MAX_PATH);
+		m_parent.StartNewDownload(addr, pass, path);
 	}
-#endif
 	EndDialog(wID);
 	return 0;
 }

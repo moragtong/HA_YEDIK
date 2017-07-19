@@ -2,6 +2,7 @@
 #include <system_error>
 #ifdef _WIN32
 #include <WinSock2.h>
+#include "WinSock.hpp"
 using socklen_t = int;
 #else
 using SOCKET = unsigned int;
@@ -17,6 +18,10 @@ enum { INVALID_SOCKET = -1 };
 #include <fcntl.h>
 #include <netdb.h>
 #endif
+bool operator==(const in_addr &, const in_addr &);
+bool operator!=(const in_addr &, const in_addr &);
+bool operator==(const sockaddr_in &, const sockaddr_in &);
+bool operator!=(const sockaddr_in &, const sockaddr_in &);
 namespace Socket::detail {
 	class Base {
 #ifdef _WIN32
@@ -33,11 +38,11 @@ namespace Socket::detail {
 		::SOCKET m_sock;
 		::sockaddr_in m_sock_info;
 		Base(::SOCKET = INVALID_SOCKET);
-		std::error_code Bind(unsigned short, ::in_addr = { 0 });
+		std::error_code Bind(unsigned short = 0, ::in_addr = { 0 });
 
 	public:
-		Base(Base &&) = default;
-		Base& operator=(Base &&) = default;
+		Base(Base &&);
+		Base& operator=(Base &&);
 		const ::sockaddr_in& GetInfo() const;
 		std::error_code Close();
 		std::error_code SetNonBlockingMode(bool);
@@ -45,10 +50,5 @@ namespace Socket::detail {
 		bool IsValid() const;
 		~Base();
 		static std::error_code GetLastError();
-#ifdef _WIN32
-		static void WSInit();
-		static void WSDeInit();
-#endif
 	};
 }
-
