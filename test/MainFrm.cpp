@@ -54,12 +54,16 @@ LRESULT CMain::OnDestroy(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BO
 
 	Socket::UDP central;
 	central.Create();
-	central.Bind(61586, { 127, 0, 0, 1 });
+	{
+		unsigned long addr = INADDR_LOOPBACK;
+		central.Bind(61586, (::in_addr &)addr);
+	}
 	for (auto &&temp : m_store) {
-		ATLASSERT(central.SendTo(nullptr, 0, std::get<1>(temp)) >= 0);
+		auto addr = 16777343UL;
+		central.SendTo(nullptr, 0, { AF_INET, std::get<1>(temp), (::in_addr &)addr });
 		std::get<0>(temp).join();
 	}
-	::WSACleanup();
+	Socket::WSDeInit();
 	return 1;
 }
 
@@ -81,9 +85,8 @@ void CMain::StartNewDownload(const unsigned long addr, const unsigned short port
 		[=, sock(::std::move(sock))] {
 			P2PClient(m_downlist, (::Socket::UDP &&)::std::move(sock)).StartDownload(addr, port, (TCHAR *)path.data());
 		},
-		sock.GetInfo()
+		sock.GetInfo().sin_port
 	);
-	ATLASSERT(!sock.IsValid());
 }
 
 void CMain::StartNewShare(unsigned long addr, unsigned long size, ::std::array<TCHAR, MAX_PATH> &name) {
@@ -94,7 +97,6 @@ void CMain::StartNewShare(unsigned long addr, unsigned long size, ::std::array<T
 		[=, sock(::std::move(sock))] {
 			P2PClient(m_downlist, (::Socket::UDP &&)::std::move(sock)).StartShare(addr, size, (TCHAR *)name.data());
 		},
-		sock.GetInfo()
+		sock.GetInfo().sin_port
 	);
-	ATLASSERT(!sock.IsValid());
 }

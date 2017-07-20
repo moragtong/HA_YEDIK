@@ -88,7 +88,9 @@ fn p2p_tracker(first : std::net::SocketAddrV4) {
                             }
                         }
                     }
-                    i = (i + 1) % clients.len();
+                    if clients.len() != 0 {
+                        i = (i + 1) % clients.len();
+                    }
                 }
             }
         }
@@ -108,4 +110,3 @@ fn main() {
         println!("shit");
     }
 }
-

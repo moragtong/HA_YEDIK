@@ -26,13 +26,13 @@ namespace Socket::detail {
 	}
 
 	Base::_wsinit::~_wsinit() {
-		::WSACleanup();
+		Socket::WSDeInit();
 	}
 
 	Base::Base(::SOCKET _sock)
 		: m_sock(_sock) {
 	}
-
+	
 	Base::Base(Base &&other) 
 		: m_sock(other.m_sock), m_sock_info(other.m_sock_info) {
 		other.m_sock = INVALID_SOCKET;
@@ -60,38 +60,38 @@ namespace Socket::detail {
 	}
 
 	std::error_code Base::Close() {
-		return { ::
+		std::error_code ret(IsValid() ? ::
 #ifdef _WIN32
-				closesocket
+			closesocket
 #else
-				close
+			close
 #endif	
-				(m_sock), std::system_category()
-		};
+			(m_sock) : 0, std::system_category()
+		);
+		m_sock = INVALID_SOCKET;
+		return ret;
 	}
 
-	std::error_code Base::SetNonBlockingMode(bool bBlockingMode) {
+	std::error_code Base::SetNonBlockingMode(bool block) {
 #ifdef _WIN32
-		unsigned long nFlag;
-		if (bBlockingMode) {
-			nFlag = 1; //for non-blocking mode
-		} else {
-			nFlag = 0; //for blocking mode
-		}
+		unsigned long flag;
+		if (block)
+			flag = 1; //for non-blocking mode
+		else
+			flag = 0; //for blocking mode
 		return { ::ioctlsocket
 #else
-			int nFlag;
+			int flag;
 #ifdef O_NONBLOCK
-			if (-1 == (nFlag = ::fcntl(sock, F_GETFL, 0))) {
-				nFlag = 0;
-			}
-			return ::fcntl(sock, F_SETFL, nFlag | O_NONBLOCK);
+			if (-1 == (flag = ::fcntl(sock, F_GETFL, 0)))
+				flag = 0;
+			return ::fcntl(sock, F_SETFL, flag | O_NONBLOCK);
 #else
-			nFlag = 1;
+			flag = 1;
 			return { ::ioctl
 #endif
 #endif
-			(m_sock, FIONBIO, &nFlag), std::system_category() };
+			(m_sock, FIONBIO, &flag), std::system_category() };
 	}
 
 	std::error_code Base::SetTimeout(unsigned long sec, unsigned long usec) {
@@ -111,8 +111,7 @@ namespace Socket::detail {
 	}
 
 	Base::~Base() {
-		if (IsValid())
-			Close();
+		Close();
 	}
 
 	std::error_code Base::GetLastError() {

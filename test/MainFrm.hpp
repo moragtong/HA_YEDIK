@@ -7,9 +7,9 @@
 #include "ShareDialog.hpp"
 
 struct CMain final : CFrameWindowImpl<CMain>, CUpdateUI<CMain>, CMessageFilter, CIdleHandler {
-	CDownloadList m_downlist;
-
 	DECLARE_FRAME_WND_CLASS(NULL, IDR_MAINFRAME)
+
+	CDownloadList m_downlist;
 
 	BOOL PreTranslateMessage(MSG *pMsg);
 	BOOL OnIdle();
@@ -37,7 +37,7 @@ struct CMain final : CFrameWindowImpl<CMain>, CUpdateUI<CMain>, CMessageFilter, 
 	LRESULT OnDownload(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 	LRESULT OnShare(WORD /*wNotifyCode*/, WORD /*wID*/, HWND /*hWndCtl*/, BOOL& /*bHandled*/);
 
-	::std::vector<::std::tuple<::std::thread, ::sockaddr_in>> m_store;
+	::std::vector<::std::tuple<::std::thread, unsigned short>> m_store;
 
 	void StartNewDownload(unsigned long, unsigned short, ::std::array<TCHAR, MAX_PATH> &);
 	void StartNewShare(unsigned long, unsigned long, ::std::array<TCHAR, MAX_PATH> &);

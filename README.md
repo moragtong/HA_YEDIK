@@ -2,9 +2,7 @@
 The Goal <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To create a simple lightweight client dependent file sharing system using P2P networking. <br />
 Description <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The project uses WinSock for networking (basically the classic BSD socket (written in C), python uses it too. Comes with Windows) and GTKMM (a C++ wrapper around GTK+, a GUI library written in C meant for Linux based OSes). <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;It also uses etl to a lesser extent for stack based memory manipulation. <br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The project can be easily ported to Linux. <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The project uses light socket wrapper and WTL, a header-only library that extends ATL and wraps Win32 (it has little to no extra overhead). <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The Logic <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A central tracker that launches trackers on seperate threads, on demand - <br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The Central tracker receives an empty packet from a client, launches a tracker, and that tracker sends an empty packet back. If everything goes well the client will store the <br />

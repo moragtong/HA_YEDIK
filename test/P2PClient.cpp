@@ -18,7 +18,7 @@ P2PClient::P2PClient(CDownloadList &_downlist, Socket::UDP &&sock)
 }
 
 bool P2PClient::RequestClientList() {
-	OutputDebugString(_T("RequestClientList"));
+	DEBUG_OUTPUT(_T("RequestClientList"));
 	char count = 4;
 	int size;
 	do {
@@ -35,7 +35,7 @@ bool P2PClient::RequestClientList() {
 }
 
 bool P2PClient::RequestFileProps() {
-	OutputDebugString(_T("RequestFileProps"));
+	DEBUG_OUTPUT(_T("RequestFileProps"));
 	for (const auto &client : m_clients) {
 		ClnCom temp{ ClnCom::FILEDATA };
 		m_sock.SendTo(&temp, sizeof(temp), client);
@@ -56,11 +56,11 @@ bool P2PClient::RequestFileProps() {
 }
 
 P2PClient::RecvResult P2PClient::RecvFileContents() {
-	OutputDebugString(_T("RecvFileContents\n"));
-	OutputDebugString(m_fileprops.m_name);
-	OutputDebugString(_T("\n"));
-	OutputDebugString(m_file_name_str);
-	OutputDebugString(_T("\n"));
+	DEBUG_OUTPUT(_T("RecvFileContents\n"));
+	DEBUG_OUTPUT(m_fileprops.m_name);
+	DEBUG_OUTPUT(_T("\n"));
+	DEBUG_OUTPUT(m_file_name_str);
+	DEBUG_OUTPUT(_T("\n"));
 	if (std::ofstream fd(m_file_name_str, std::fstream::binary); fd) {
 		ClnCom temp{ ClnCom::PKT };
 		::std::vector<char> relib(m_clients.size(), 2);
@@ -96,24 +96,23 @@ P2PClient::RecvResult P2PClient::RecvFileContents() {
 		fd.close();
 		return RecvResult::SUCCESS;
 	}
-	OutputDebugString(_T("RecvResult::ERROR_FILEIO\n"));
+	DEBUG_OUTPUT(_T("RecvResult::ERROR_FILEIO\n"));
 	return RecvResult::ERROR_FILEIO;
 }
 
 void P2PClient::Seed() {
-	OutputDebugString(_T("Seeding\n"));
+	DEBUG_OUTPUT(_T("Seeding\n"));
 	const auto file_props_size = sizeof(m_fileprops.m_size) + ((char*)_tmemchr(m_fileprops.m_name, _T('\0'), sizeof(m_fileprops.m_name)) - (char*)m_fileprops.m_name) + sizeof(_T('\0'));
 	for (;;) {
 		ClnCom temp;
 		auto[size, client] = m_sock.RecvFrom(&temp, sizeof(temp));
-		OutputDebugString(_T("got one\n"));
-		OutputDebugStringA(Socket::UDP::GetLastError().message().data());
+		DEBUG_OUTPUT(_T("got one\n"));
 		sockaddr_in temp_addr{ AF_INET, 37616 };
-		temp_addr.sin_addr.s_addr = 2130706433L;
+		temp_addr.sin_addr.s_addr = 16777343L;
 		if (size == sizeof(temp)) {
 			switch (temp.m_command) {
 				case ClnCom::PKT:
-					OutputDebugString(_T("ClnCom::PKT\n"));
+					DEBUG_OUTPUT(_T("ClnCom::PKT\n"));
 					if (std::ifstream fd(m_file_name_str, std::fstream::binary); fd) {
 						fd.seekg(temp.m_param);
 						char buff[BUFFSIZE];
@@ -124,16 +123,18 @@ void P2PClient::Seed() {
 					break;
 
 				case ClnCom::FILEDATA:
-					OutputDebugString(_T("ClnCom::FILEDATA\n"));
+					DEBUG_OUTPUT(_T("ClnCom::FILEDATA\n"));
 					m_sock.SendTo(&m_fileprops, file_props_size, client);
 					break;
 
 				default:
-					OutputDebugString(_T("eh?\n"));
+					DEBUG_OUTPUT(_T("eh?\n"));
 			}
-		} else //if (!size && client == temp_addr)
+		} else if (!size && client == temp_addr)
 			break;
 	}
+	TrkCom temp{ TrkCom::REMOVE };
+	m_sock.SendTo(&temp, sizeof(temp), m_tracker);
 }
 
 void P2PClient::StartDownload(const unsigned long addr, const unsigned short port, TCHAR location[MAX_PATH]) {
@@ -141,7 +142,6 @@ void P2PClient::StartDownload(const unsigned long addr, const unsigned short por
 	(unsigned long &)m_tracker.sin_addr = htonl(addr);
 	m_file_name_str = location;
 
-	//m_sock.Create();
 	m_sock.SetTimeout(1);
 
 	if (RequestClientList()) {//temp
@@ -159,17 +159,12 @@ void P2PClient::StartDownload(const unsigned long addr, const unsigned short por
 void P2PClient::StartShare(const unsigned long addr, const unsigned long m_size, TCHAR m_name[MAX_PATH]) {
 	(unsigned long &)m_tracker.sin_addr = htonl(addr);
 	m_tracker.sin_port = 8513; //htons(16673)
-	//memset(m_tracker.sin_zero, 0, sizeof(m_tracker.sin_zero));
 	m_fileprops.m_size = m_size;
 	m_file_name_str = m_name;
 	_tcsncpy(m_fileprops.m_name, _tcsrchr(m_name, '\\') + 1, MAX_PATH);
-	//m_sock.Create();
 	m_sock.SendTo(nullptr, 0, m_tracker);
 	std::tie(std::ignore, m_tracker) = m_sock.RecvFrom(nullptr, 0);
 	m_sock.SendTo(nullptr, 0, m_tracker);
-	OutputDebugString(_T("\ncheck\n"));
-	OutputDebugStringA(m_sock.GetLastError().message().data());
-	OutputDebugString(_T("\ncheck\n"));
 	TCHAR buff[6];
 	_itot(ntohs(m_tracker.sin_port), buff, 10);
 	m_downlist.SetItemText(m_idx, 3, buff);
@@ -177,5 +172,5 @@ void P2PClient::StartShare(const unsigned long addr, const unsigned long m_size,
 }
 
 P2PClient::~P2PClient() {
-	::WSACleanup();
+	Socket::WSDeInit();
 }
