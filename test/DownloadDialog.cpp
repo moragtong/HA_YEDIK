@@ -59,7 +59,9 @@ LRESULT CDownloadDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*
 		m_port.GetWindowText(m_port_str, sizeof(m_port_str) / sizeof(TCHAR));
 		m_parent.m_downlist.AddItem(idx, 3, m_port_str);
 	}
-	m_parent.m_downlist.AddItem(idx, 4, _T("0%"));
+	m_parent.m_downlist.AddSubObject<CProgressBarCtrl>(idx, 4, 0, WS_CHILD);
+	((CProgressBarCtrl &&)m_parent.m_downlist.m_subobjects.back()).SetRange32(0, 100);
+	((CProgressBarCtrl &&)m_parent.m_downlist.m_subobjects.back()).SetPos(0);
 	{
 		DWORD addr;
 		m_ip.GetAddress(&addr);

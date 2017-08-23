@@ -121,6 +121,7 @@ namespace Socket::detail {
 #else
 			errno
 #endif
-			, std::system_category() };
+			, std::system_category()
+		};
 	}
 }

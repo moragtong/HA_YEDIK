@@ -87,9 +87,10 @@ P2PClient::RecvResult P2PClient::RecvFileContents() {
 				relib[i] = 2;
 				fd.write(buff, size);
 				
-				_itot(temp.m_param * 100 / m_fileprops.m_size, len_buff, 10);
+				/*_itot(temp.m_param * 100 / m_fileprops.m_size, len_buff, 10);
 				_tcscat(len_buff, _T("%"));
-				m_downlist.SetItemText(m_idx, 4, len_buff);
+				m_downlist.SetItemText(m_idx, 4, len_buff);*/
+				((CProgressBarCtrl &&)m_downlist.m_subobjects[m_idx]).SetPos(temp.m_param * 100 / m_fileprops.m_size);
 			}
 			i = (i + 1) % m_clients.size();
 		} while (temp.m_param < m_fileprops.m_size);
@@ -119,19 +120,24 @@ void P2PClient::Seed() {
 						fd.read(buff, sizeof(buff));
 						m_sock.SendTo(buff, fd.gcount(), client);
 						fd.close();
+						continue;
 					}
 					break;
 
 				case ClnCom::FILEDATA:
 					DEBUG_OUTPUT(_T("ClnCom::FILEDATA\n"));
 					m_sock.SendTo(&m_fileprops, file_props_size, client);
-					break;
+					continue;
 
 				default:
 					DEBUG_OUTPUT(_T("eh?\n"));
+					continue;
 			}
 		} else if (!size && client == temp_addr)
 			break;
+		else
+			continue;
+		break;
 	}
 	TrkCom temp{ TrkCom::REMOVE };
 	m_sock.SendTo(&temp, sizeof(temp), m_tracker);
@@ -144,15 +150,11 @@ void P2PClient::StartDownload(const unsigned long addr, const unsigned short por
 
 	m_sock.SetTimeout(1);
 
-	if (RequestClientList()) {//temp
-		if (RequestFileProps()) {
-			if (RecvFileContents() == RecvResult::SUCCESS) {
-				m_sock.SetTimeout(0);
-				TrkCom temp{ TrkCom::ADD };
-				m_sock.SendTo(&temp, sizeof(temp), m_tracker);
-				Seed();
-			}
-		}
+	if (RequestClientList() && RequestFileProps() && RecvFileContents() == RecvResult::SUCCESS) {
+		m_sock.SetTimeout(0);
+		TrkCom temp{ TrkCom::ADD };
+		m_sock.SendTo(&temp, sizeof(temp), m_tracker);
+		Seed();
 	}
 }
 

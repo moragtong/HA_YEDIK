@@ -52,7 +52,7 @@ LRESULT CShareDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, 
 			}
 			_ltot(size, file_size_str, 10);
 		}
-		m_parent.m_downlist.AddItem(idx, 0, _tcsrchr(name_str.data(), '\\') + 1);
+		m_parent.m_downlist.AddItem(idx, 0, _tcsrchr(name_str.data(), _T('\\')) + 1);
 		m_parent.m_downlist.AddItem(idx, 1, file_size_str);
 	}
 	{
@@ -61,7 +61,9 @@ LRESULT CShareDialog::OnOKCmd(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, 
 		m_parent.m_downlist.AddItem(idx, 2, m_ip_str);
 	}
 	m_parent.m_downlist.AddItem(idx, 3, nullptr);
-	m_parent.m_downlist.AddItem(idx, 4, _T("100%"));
+	m_parent.m_downlist.AddSubObject<CProgressBarCtrl>(idx, 4, 0, WS_CHILD);
+	((CProgressBarCtrl &&)m_parent.m_downlist.m_subobjects.back()).SetRange32(0, 100);
+	((CProgressBarCtrl &&)m_parent.m_downlist.m_subobjects.back()).SetPos(100);
 	DWORD addr;
 	m_ip.GetAddress(&addr);
 	m_parent.StartNewShare(addr, size, name_str);
